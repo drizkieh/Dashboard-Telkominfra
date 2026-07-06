@@ -814,8 +814,8 @@ function populateFilters() {
   const periodes = [...new Set(rawData.map(r => String(r['Periode']||'')))].filter(Boolean)
     .sort((a,b) => periodeIndex(a) - periodeIndex(b));
   const tipes = [...new Set(rawData.map(r => r['Tipe Pekerjaan']))].filter(Boolean).sort();
-  const poses = [...new Set(rawData.map(r => r['No PO']))].filter(Boolean).sort();
-  const acts  = [...new Set(rawData.map(r => r['ACT ID']))].filter(Boolean).sort();
+  const poses = [...new Set(rawData.map(r => String(r['No PO']||'')))].filter(Boolean).sort();
+  const acts  = [...new Set(rawData.map(r => String(r['ACT ID']||'')))].filter(Boolean).sort();
 
   fillSelect('fTahun',   tahuns);
   fillSelect('fPeriode', periodes);
@@ -843,8 +843,8 @@ function applyFilters() {
     (!fT  || String(r['Tahun'])         === fT)  &&
     (!fP  || String(r['Periode'])       === fP)  &&
     (!fTp || r['Tipe Pekerjaan']        === fTp) &&
-    (!fPO || r['No PO']                 === fPO) &&
-    (!fA  || r['ACT ID']               === fA)
+    (!fPO || String(r['No PO'])         === fPO) &&
+    (!fA  || String(r['ACT ID'])        === fA)
   );
 
   const periodeLabel2 = fP
