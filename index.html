@@ -7,196 +7,70 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
-    --bg: #0d0d0d;
-    --bg2: #141414;
-    --bg3: #1a1a1a;
-    --card: #1c1c1c;
-    --border: #2a2a2a;
-    --red: #e63c2f;
-    --orange: #f97316;
-    --amber: #f59e0b;
-    --yellow: #eab308;
-    --text: #f0f0f0;
-    --muted: #888;
-    --subtle: #555;
-    --radius: 10px;
+    --bg: #0d0d0d; --bg2: #141414; --bg3: #1a1a1a; --card: #1c1c1c;
+    --border: #2a2a2a; --red: #e63c2f; --orange: #f97316; --amber: #f59e0b;
+    --yellow: #eab308; --text: #f0f0f0; --muted: #888; --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    font-size: 13px;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
 
   /* HEADER */
-  .header {
-    background: linear-gradient(135deg, #1a0a08 0%, #0d0d0d 60%);
-    border-bottom: 1px solid #2a1510;
-    padding: 14px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  .header { background: linear-gradient(135deg, #1a0a08 0%, #0d0d0d 60%); border-bottom: 1px solid #2a1510; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
   .header-left { display: flex; align-items: center; gap: 14px; }
-  .logo {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--red), var(--orange));
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: 900; color: white;
-  }
+  .logo { width: 44px; height: 44px; background: linear-gradient(135deg, var(--red), var(--orange)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; color: white; }
   .header-title h1 { font-size: 18px; font-weight: 700; color: white; letter-spacing: 1px; }
   .header-title h2 { font-size: 13px; font-weight: 600; color: var(--orange); letter-spacing: 0.5px; }
   .header-title p  { font-size: 11px; color: var(--muted); }
   .header-right { text-align: right; }
   .header-right .label { font-size: 10px; color: var(--muted); }
   .header-right .date  { font-size: 13px; color: var(--orange); font-weight: 600; }
-  #data-update-date { color: var(--orange); }
 
   /* LAYOUT */
   .main { display: flex; min-height: calc(100vh - 73px); }
 
   /* SIDEBAR */
-  .sidebar {
-    width: 200px;
-    min-width: 200px;
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    padding: 16px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .filter-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--orange);
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .filter-group label {
-    display: block;
-    font-size: 10px;
-    color: var(--muted);
-    margin-bottom: 4px;
-    font-weight: 600;
-  }
-  .filter-group select {
-    width: 100%;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 6px;
-    padding: 6px 8px;
-    font-size: 12px;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-  }
+  .sidebar { width: 200px; min-width: 200px; background: var(--bg2); border-right: 1px solid var(--border); padding: 16px 12px; display: flex; flex-direction: column; gap: 12px; }
+  .filter-title { font-size: 11px; font-weight: 700; color: var(--orange); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .filter-group label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+  .filter-group select { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 8px; font-size: 12px; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
   .filter-group select:focus { outline: none; border-color: var(--orange); }
-
-  .summary-box {
-    background: var(--bg3);
-    border: 1px solid #2a1510;
-    border-radius: 8px;
-    padding: 12px;
-    margin-top: 4px;
-  }
+  .summary-box { background: var(--bg3); border: 1px solid #2a1510; border-radius: 8px; padding: 12px; margin-top: 4px; }
   .summary-box .s-label { font-size: 10px; color: var(--orange); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
   .summary-box .s-row { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
   .summary-box .s-val { font-size: 15px; font-weight: 700; color: var(--orange); }
   .summary-box .s-val2 { font-size: 14px; font-weight: 700; color: var(--text); }
-  .btn-refresh {
-    width: 100%;
-    padding: 8px;
-    background: linear-gradient(135deg, var(--red), var(--orange));
-    border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: opacity 0.2s;
-  }
+  .btn-refresh { width: 100%; padding: 8px; background: linear-gradient(135deg, var(--red), var(--orange)); border: none; border-radius: 6px; color: white; font-size: 11px; font-weight: 600; cursor: pointer; letter-spacing: 0.5px; transition: opacity 0.2s; }
   .btn-refresh:hover { opacity: 0.85; }
 
   /* CONTENT */
   .content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-x: hidden; }
 
-  /* KPI CARDS */
+  /* KPI */
   .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-  .kpi-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .kpi-icon {
-    width: 36px; height: 36px;
-    background: rgba(233,63,47,0.15);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
+  .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .kpi-icon { width: 36px; height: 36px; background: rgba(233,63,47,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
   .kpi-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
   .kpi-val   { font-size: 20px; font-weight: 700; color: white; line-height: 1.1; }
   .kpi-val.orange { color: var(--orange); }
   .kpi-sub   { font-size: 10px; color: var(--muted); }
 
-  /* CHARTS ROW 1 */
+  /* CHARTS */
   .charts-row { display: grid; gap: 12px; }
   .charts-row-1 { grid-template-columns: 1fr 1fr; }
   .charts-row-2 { grid-template-columns: 1fr 1fr 220px; }
   .charts-row-3 { grid-template-columns: 280px 1fr; }
-
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-  }
-  .chart-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .chart-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
   .chart-wrap { position: relative; width: 100%; }
 
-  /* DONUT LEGEND */
+  /* DONUT */
   .donut-area { display: flex; align-items: center; gap: 16px; }
   .donut-wrap { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
-  .donut-center {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    pointer-events: none;
-  }
+  .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
   .donut-center .big { font-size: 20px; font-weight: 700; color: white; }
   .donut-center .sm  { font-size: 10px; color: var(--muted); }
   .donut-legend { flex: 1; }
-  .legend-row {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid #222;
-    gap: 8px;
-  }
+  .legend-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; gap: 8px; }
   .legend-row:last-child { border-bottom: none; }
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
   .legend-name { flex: 1; font-size: 11px; color: var(--text); }
@@ -205,26 +79,14 @@
 
   /* MONTHLY LIST */
   .monthly-list { display: flex; flex-direction: column; gap: 6px; }
-  .monthly-item {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg3); border-radius: 6px; padding: 8px 10px;
-  }
-  .monthly-icon {
-    width: 28px; height: 28px;
-    background: linear-gradient(135deg, var(--red), var(--orange));
-    border-radius: 6px; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; flex-shrink: 0;
-  }
+  .monthly-item { display: flex; align-items: center; gap: 10px; background: var(--bg3); border-radius: 6px; padding: 8px 10px; }
+  .monthly-icon { width: 28px; height: 28px; background: linear-gradient(135deg, var(--red), var(--orange)); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
   .monthly-info { flex: 1; }
   .monthly-month { font-size: 10px; color: var(--muted); }
   .monthly-amt   { font-size: 12px; font-weight: 700; color: white; }
 
   /* DISTRIB */
-  .distrib-row {
-    display: flex; align-items: center;
-    gap: 8px; padding: 5px 0;
-    border-bottom: 1px solid #222;
-  }
+  .distrib-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #222; }
   .distrib-row:last-child { border-bottom: none; }
   .distrib-label { width: 100px; font-size: 11px; color: var(--muted); flex-shrink: 0; }
   .distrib-bar-wrap { flex: 1; background: #222; border-radius: 3px; height: 8px; }
@@ -232,89 +94,59 @@
   .distrib-pct { font-size: 11px; font-weight: 700; color: var(--orange); min-width: 36px; text-align: right; }
 
   /* TABLE */
-  .table-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    overflow: hidden;
-  }
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; overflow: hidden; }
   .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; }
-  th {
-    font-size: 9px; font-weight: 700; color: var(--orange);
-    letter-spacing: 0.8px; text-transform: uppercase;
-    padding: 8px 10px; text-align: left;
-    border-bottom: 1px solid #2a1510;
-    background: rgba(233,63,47,0.05);
-  }
+  th { font-size: 9px; font-weight: 700; color: var(--orange); letter-spacing: 0.8px; text-transform: uppercase; padding: 8px 10px; text-align: left; border-bottom: 1px solid #2a1510; background: rgba(233,63,47,0.05); }
   td { padding: 8px 10px; font-size: 11px; color: var(--text); border-bottom: 1px solid #1e1e1e; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: rgba(249,115,22,0.05); }
-  .badge {
-    display: inline-block; padding: 2px 8px;
-    border-radius: 4px; font-size: 10px; font-weight: 600;
-  }
-  .badge-red { background: rgba(230,60,47,0.2); color: #f87171; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .badge-red    { background: rgba(230,60,47,0.2); color: #f87171; }
   .badge-orange { background: rgba(249,115,22,0.2); color: var(--orange); }
   .badge-yellow { background: rgba(234,179,8,0.2); color: var(--yellow); }
-  .badge-pink { background: rgba(236,72,153,0.2); color: #f472b6; }
+  .badge-pink   { background: rgba(236,72,153,0.2); color: #f472b6; }
 
   /* LOADING */
-  .loading-overlay {
-    position: fixed; inset: 0; background: rgba(13,13,13,0.85);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999; flex-direction: column; gap: 14px;
-  }
-  .spinner {
-    width: 40px; height: 40px;
-    border: 3px solid #2a2a2a;
-    border-top-color: var(--orange);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 14px; }
+  .spinner { width: 40px; height: 40px; border: 3px solid #2a2a2a; border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-size: 13px; color: var(--muted); }
 
-  /* CONFIG MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 8888;
-  }
-  .modal {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px; width: 480px; max-width: 90vw;
-  }
-  .modal h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
-  .modal p  { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
-  .modal input {
-    width: 100%; background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); border-radius: 6px; padding: 10px 12px;
-    font-size: 13px; margin-bottom: 10px;
-  }
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 8888; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 520px; max-width: 92vw; }
+  .modal h3 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* Source selector tabs */
+  .source-tabs { display: flex; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .source-tab { flex: 1; padding: 10px; text-align: center; font-size: 12px; font-weight: 600; cursor: pointer; background: var(--bg3); color: var(--muted); border: none; transition: all 0.15s; }
+  .source-tab.active { background: linear-gradient(135deg, rgba(230,60,47,0.3), rgba(249,115,22,0.3)); color: var(--orange); border-bottom: 2px solid var(--orange); }
+  .source-tab:hover:not(.active) { background: #222; color: var(--text); }
+
+  /* Source panels */
+  .source-panel { display: none; }
+  .source-panel.active { display: block; }
+
+  /* Default sheet card */
+  .default-sheet-card { background: var(--bg3); border: 1px solid #2a1510; border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .default-sheet-card .ds-label { font-size: 10px; color: var(--orange); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .default-sheet-card .ds-name { font-size: 13px; color: white; font-weight: 600; margin-bottom: 4px; }
+  .default-sheet-card .ds-id { font-size: 10px; color: var(--muted); font-family: monospace; word-break: break-all; }
+  .connected-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(34,197,94,0.15); color: #4ade80; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-top: 6px; }
+
+  .modal input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 10px 12px; font-size: 13px; margin-bottom: 10px; }
   .modal input:focus { outline: none; border-color: var(--orange); }
   .modal-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: block; }
   .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-  .btn-secondary {
-    padding: 8px 16px; background: transparent;
-    border: 1px solid var(--border); border-radius: 6px;
-    color: var(--muted); font-size: 12px; cursor: pointer;
-  }
-  .btn-primary {
-    padding: 8px 20px;
-    background: linear-gradient(135deg, var(--red), var(--orange));
-    border: none; border-radius: 6px;
-    color: white; font-size: 12px; font-weight: 600; cursor: pointer;
-  }
+  .btn-secondary { padding: 8px 16px; background: transparent; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); font-size: 12px; cursor: pointer; }
+  .btn-primary { padding: 8px 20px; background: linear-gradient(135deg, var(--red), var(--orange)); border: none; border-radius: 6px; color: white; font-size: 12px; font-weight: 600; cursor: pointer; }
   .error-msg { font-size: 11px; color: #f87171; margin-top: 4px; display: none; }
-  .config-hint {
-    background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2);
-    border-radius: 6px; padding: 10px 12px; font-size: 11px; color: var(--muted);
-    line-height: 1.6; margin-bottom: 12px;
-  }
+  .config-hint { background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2); border-radius: 6px; padding: 10px 12px; font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
   .config-hint code { color: var(--orange); font-size: 11px; }
+  .source-indicator { font-size: 10px; color: var(--muted); }
+  .source-indicator span { color: var(--orange); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -328,21 +160,63 @@
 <!-- CONFIG MODAL -->
 <div class="modal-overlay" id="configModal" style="display:none">
   <div class="modal">
-    <h3>⚙️ Konfigurasi Google Sheets</h3>
-    <p>Masukkan Sheet ID dari Google Spreadsheet kamu. Pastikan spreadsheet sudah di-share ke <strong>Anyone with the link</strong> (Viewer).</p>
-    <div class="config-hint">
-      URL contoh: <code>https://docs.google.com/spreadsheets/d/<strong>1BxiMVs0XRA…</strong>/edit</code><br>
-      Bagian yang tebal di atas adalah <strong>Sheet ID</strong>-nya.
+    <h3>⚙️ Sumber Data</h3>
+
+    <!-- TABS -->
+    <div class="source-tabs">
+      <button class="source-tab active" id="tabDefault" onclick="switchTab('default')">📊 Sheet Default</button>
+      <button class="source-tab" id="tabCustom" onclick="switchTab('custom')">🔗 Sheet Lain</button>
+      <button class="source-tab" id="tabDemo" onclick="switchTab('demo')">🎲 Data Demo</button>
     </div>
-    <label class="modal-label">Sheet ID</label>
-    <input type="text" id="sheetIdInput" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
-    <label class="modal-label">Nama Sheet (tab)</label>
-    <input type="text" id="sheetNameInput" placeholder="Sheet1" value="Sheet1">
-    <div class="error-msg" id="configError"></div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="useDummyData()">Pakai Data Demo</button>
-      <button class="btn-primary" onclick="connectSheet()">Hubungkan</button>
+
+    <!-- PANEL: DEFAULT -->
+    <div class="source-panel active" id="panelDefault">
+      <div class="default-sheet-card">
+        <div class="ds-label">SHEET DEFAULT — INTEGRA SOLUSI MANDIRI</div>
+        <div class="ds-name">Invoice Management Sheet</div>
+        <div class="ds-id">1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q</div>
+        <div class="connected-badge">✓ Siap digunakan</div>
+      </div>
+      <label class="modal-label">Nama Tab Sheet</label>
+      <input type="text" id="defaultSheetName" placeholder="Sheet1" value="Sheet1">
+      <div class="error-msg" id="defaultError"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="hideConfig()">Batal</button>
+        <button class="btn-primary" onclick="connectDefault()">Gunakan Sheet Default</button>
+      </div>
     </div>
+
+    <!-- PANEL: CUSTOM -->
+    <div class="source-panel" id="panelCustom">
+      <div class="config-hint">
+        Ambil Sheet ID dari URL spreadsheet kamu:<br>
+        <code>…/spreadsheets/d/<strong>[SHEET ID]</strong>/edit</code><br>
+        Pastikan sudah di-share: <strong>Anyone with the link → Viewer</strong>
+      </div>
+      <label class="modal-label">Sheet ID</label>
+      <input type="text" id="sheetIdInput" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+      <label class="modal-label">Nama Tab Sheet</label>
+      <input type="text" id="sheetNameInput" placeholder="Sheet1" value="Sheet1">
+      <div class="error-msg" id="configError"></div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="hideConfig()">Batal</button>
+        <button class="btn-primary" onclick="connectCustom()">Hubungkan</button>
+      </div>
+    </div>
+
+    <!-- PANEL: DEMO -->
+    <div class="source-panel" id="panelDemo">
+      <div class="default-sheet-card" style="border-color:var(--border)">
+        <div class="ds-label">DATA DEMO</div>
+        <div class="ds-name">55 invoice dummy — Desember 2025 s/d Juni 2026</div>
+        <div class="ds-id" style="color:var(--muted);margin-top:6px">Tidak memerlukan koneksi internet. Cocok untuk preview tampilan dashboard.</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="hideConfig()">Batal</button>
+        <button class="btn-primary" onclick="useDummyData()">Muat Data Demo</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -359,7 +233,8 @@
   <div class="header-right">
     <div class="label">Data Update :</div>
     <div class="date" id="data-update-date">–</div>
-    <div style="margin-top:4px">
+    <div style="margin-top:4px;display:flex;align-items:center;gap:6px;justify-content:flex-end">
+      <div class="source-indicator" id="sourceIndicator">Sumber: <span>–</span></div>
       <button class="btn-primary" style="font-size:10px;padding:4px 10px" onclick="openConfig()">⚙ Ganti Sheet</button>
     </div>
   </div>
@@ -370,14 +245,13 @@
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="filter-title">⬡ FILTER</div>
-
     <div class="filter-group">
       <label>Tahun</label>
       <select id="fTahun" onchange="applyFilters()"><option value="">All</option></select>
     </div>
     <div class="filter-group">
-      <label>Bulan Tanggal</label>
-      <select id="fBulan" onchange="applyFilters()"><option value="">All</option></select>
+      <label>Periode</label>
+      <select id="fPeriode" onchange="applyFilters()"><option value="">All</option></select>
     </div>
     <div class="filter-group">
       <label>Tipe Pekerjaan</label>
@@ -391,9 +265,7 @@
       <label>ACT ID</label>
       <select id="fACT" onchange="applyFilters()"><option value="">All</option></select>
     </div>
-
     <button class="btn-refresh" onclick="resetFilters()">↺ Reset Filter</button>
-
     <div class="summary-box">
       <div class="s-label">RINGKASAN PERIODE</div>
       <div class="s-row">Periode Terpilih</div>
@@ -457,16 +329,16 @@
     <!-- ROW 1: Trend + Donut -->
     <div class="charts-row charts-row-1">
       <div class="chart-card">
-        <div class="chart-title">Trend Invoice Value per Bulan</div>
+        <div class="chart-title">Trend Invoice Value per Periode</div>
         <div class="chart-wrap" style="height:200px">
-          <canvas id="chartTrend" role="img" aria-label="Line chart trend invoice value per bulan"></canvas>
+          <canvas id="chartTrend" role="img" aria-label="Trend invoice value per periode"></canvas>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Invoice Value by Tipe Pekerjaan</div>
         <div class="donut-area">
           <div class="donut-wrap">
-            <canvas id="chartDonut" role="img" aria-label="Donut chart invoice by tipe pekerjaan"></canvas>
+            <canvas id="chartDonut" role="img" aria-label="Donut invoice by tipe"></canvas>
             <div class="donut-center">
               <div class="big" id="donutCenter">–</div>
               <div class="sm">Miliar</div>
@@ -482,22 +354,22 @@
       <div class="chart-card">
         <div class="chart-title">Invoice Value by PO (Top 10)</div>
         <div class="chart-wrap" id="barPOWrap" style="height:220px">
-          <canvas id="chartBarPO" role="img" aria-label="Horizontal bar chart invoice value by PO top 10"></canvas>
+          <canvas id="chartBarPO" role="img" aria-label="Bar invoice by PO top 10"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Invoice Value per Bulan by Tipe Pekerjaan</div>
+        <div class="chart-title">Invoice Value per Periode by Tipe Pekerjaan</div>
         <div class="chart-wrap" style="height:220px">
-          <canvas id="chartStacked" role="img" aria-label="Stacked bar chart invoice per bulan by tipe pekerjaan"></canvas>
+          <canvas id="chartStacked" role="img" aria-label="Stacked bar invoice per periode by tipe"></canvas>
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Invoice Value per Bulan</div>
+        <div class="chart-title">Invoice Value per Periode</div>
         <div class="monthly-list" id="monthlyList"></div>
       </div>
     </div>
 
-    <!-- ROW 3: Distribusi + Detail Table -->
+    <!-- ROW 3: Distribusi + Table -->
     <div class="charts-row charts-row-3">
       <div class="chart-card">
         <div class="chart-title">Distribusi Invoice Value</div>
@@ -512,15 +384,8 @@
           <table>
             <thead>
               <tr>
-                <th>No Invoice</th>
-                <th>ACT ID</th>
-                <th>No PO</th>
-                <th>No BAST</th>
-                <th>Value Invoice</th>
-                <th>Periode</th>
-                <th>Tahun</th>
-                <th>Bulan Tanggal</th>
-                <th>Tipe Pekerjaan</th>
+                <th>No Invoice</th><th>ACT ID</th><th>No PO</th><th>No BAST</th>
+                <th>Value Invoice</th><th>Periode</th><th>Tahun</th><th>Bulan Tanggal</th><th>Tipe Pekerjaan</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -529,77 +394,125 @@
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
+  </div>
+</div>
 
 <script>
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let rawData = [];
-let filteredData = [];
-let showAll = false;
-let charts = {};
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const DEFAULT_SHEET_ID   = '1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q';
+const DEFAULT_SHEET_NAME = 'Sheet1';
+
+// Urutan bulan Indonesia untuk sorting kolom Periode
+const PERIODE_ORDER = [
+  'Januari','Februari','Maret','April','Mei','Juni',
+  'Juli','Agustus','September','Oktober','November','Desember'
+];
+// Fallback jika Periode pakai nama Inggris
+const PERIODE_ORDER_EN = [
+  'January','February','March','April','May','June',
+  'July','August','September','October','November','December'
+];
 
 const TIPE_COLORS = {
-  'Reenginering': '#e63c2f',
-  'Recbatt':      '#f97316',
-  'CET':          '#eab308',
-  'Validasi Inaktif Radio': '#ec4899',
+  'Reenginering':          '#e63c2f',
+  'Recbatt':               '#f97316',
+  'CET':                   '#eab308',
+  'Validasi Inaktif Radio':'#ec4899',
 };
-function tipeColor(t) {
-  return TIPE_COLORS[t] || '#888';
-}
+function tipeColor(t) { return TIPE_COLORS[t] || '#888'; }
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let rawData      = [];
+let filteredData = [];
+let showAll      = false;
+let charts       = {};
+let activeTab    = 'default';
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('inv_sheet_id');
-  if (saved) {
-    const name = localStorage.getItem('inv_sheet_name') || 'Sheet1';
-    fetchSheetData(saved, name);
+  const savedId   = localStorage.getItem('inv_sheet_id');
+  const savedName = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
+  const savedSrc  = localStorage.getItem('inv_source') || 'default';
+
+  if (savedSrc === 'demo') {
+    loadDemo();
+  } else if (savedSrc === 'custom' && savedId) {
+    setSourceIndicator('Custom Sheet');
+    fetchSheetData(savedId, savedName);
   } else {
-    hideLoading();
-    showConfig();
+    // default
+    setSourceIndicator('Sheet Default');
+    fetchSheetData(DEFAULT_SHEET_ID, savedName);
   }
 });
 
+// ─── TAB SWITCH ───────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  ['default','custom','demo'].forEach(t => {
+    document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t===tab);
+    document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', t===tab);
+  });
+  document.getElementById('defaultError').style.display = 'none';
+  document.getElementById('configError').style.display  = 'none';
+}
+
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 function openConfig() {
-  const id = localStorage.getItem('inv_sheet_id') || '';
-  const nm = localStorage.getItem('inv_sheet_name') || 'Sheet1';
-  document.getElementById('sheetIdInput').value = id;
-  document.getElementById('sheetNameInput').value = nm;
-  showConfig();
-}
-function showConfig() {
+  const src = localStorage.getItem('inv_source') || 'default';
+  switchTab(src === 'custom' ? 'custom' : src === 'demo' ? 'demo' : 'default');
+  if (src === 'custom') {
+    document.getElementById('sheetIdInput').value   = localStorage.getItem('inv_sheet_id') || '';
+    document.getElementById('sheetNameInput').value = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
+  }
   document.getElementById('configModal').style.display = 'flex';
 }
 function hideConfig() {
   document.getElementById('configModal').style.display = 'none';
 }
-function connectSheet() {
-  const id = document.getElementById('sheetIdInput').value.trim();
-  const nm = document.getElementById('sheetNameInput').value.trim() || 'Sheet1';
-  if (!id) {
-    showErr('Sheet ID tidak boleh kosong.');
-    return;
-  }
-  localStorage.setItem('inv_sheet_id', id);
-  localStorage.setItem('inv_sheet_name', nm);
+
+function connectDefault() {
+  const name = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
+  localStorage.setItem('inv_source',     'default');
+  localStorage.setItem('inv_sheet_name', name);
+  localStorage.removeItem('inv_sheet_id');
   hideConfig();
-  showLoading('Mengambil data dari Google Sheets…');
-  fetchSheetData(id, nm);
+  setSourceIndicator('Sheet Default');
+  showLoading('Menghubungkan ke Sheet Default…');
+  fetchSheetData(DEFAULT_SHEET_ID, name);
 }
-function showErr(msg) {
-  const el = document.getElementById('configError');
+
+function connectCustom() {
+  const id   = document.getElementById('sheetIdInput').value.trim();
+  const name = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
+  if (!id) { showErr('configError', 'Sheet ID tidak boleh kosong.'); return; }
+  localStorage.setItem('inv_source',     'custom');
+  localStorage.setItem('inv_sheet_id',   id);
+  localStorage.setItem('inv_sheet_name', name);
+  hideConfig();
+  setSourceIndicator('Custom Sheet');
+  showLoading('Mengambil data dari Google Sheets…');
+  fetchSheetData(id, name);
+}
+
+function useDummyData() {
+  localStorage.setItem('inv_source', 'demo');
+  localStorage.removeItem('inv_sheet_id');
+  hideConfig();
+  setSourceIndicator('Data Demo');
+  loadDemo();
+}
+function loadDemo() {
+  showLoading('Memuat data demo…');
+  setTimeout(() => { rawData = generateDummyData(); onDataReady(); }, 600);
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
   el.textContent = msg; el.style.display = 'block';
 }
-function useDummyData() {
-  hideConfig();
-  showLoading('Memuat data demo…');
-  setTimeout(() => {
-    rawData = generateDummyData();
-    localStorage.removeItem('inv_sheet_id');
-    onDataReady();
-  }, 800);
+function setSourceIndicator(label) {
+  document.getElementById('sourceIndicator').innerHTML = `Sumber: <span>${label}</span>`;
 }
 
 // ─── FETCH SHEET ──────────────────────────────────────────────────────────────
@@ -614,63 +527,69 @@ function fetchSheetData(sheetId, sheetName) {
         onDataReady();
       } catch(e) {
         hideLoading();
-        showConfig();
-        showErr('Gagal parsing data. Pastikan sheet sudah dibagikan (Anyone with link – Viewer).');
+        showConfig_withError('Gagal parsing data. Cek apakah sheet sudah dibagikan (Anyone with link – Viewer).');
       }
     })
     .catch(() => {
       hideLoading();
-      showConfig();
-      showErr('Gagal terhubung. Cek Sheet ID dan koneksi internet.');
+      showConfig_withError('Gagal terhubung. Cek Sheet ID dan koneksi internet.');
     });
+}
+function showConfig_withError(msg) {
+  openConfig();
+  const errId = activeTab === 'custom' ? 'configError' : 'defaultError';
+  showErr(errId, msg);
 }
 
 function parseGvizData(json) {
   const cols = json.table.cols.map(c => c.label);
-  return json.table.rows.map(row => {
-    const obj = {};
-    cols.forEach((col, i) => {
-      const cell = row.c[i];
-      obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
-    });
-    return obj;
-  }).filter(r => r['No Invoice']);
+  return json.table.rows
+    .map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = row.c[i];
+        obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
+      });
+      return obj;
+    })
+    .filter(r => r['No Invoice']);
 }
 
 // ─── DUMMY DATA ───────────────────────────────────────────────────────────────
 function generateDummyData() {
   const invoices = [];
   const tipes = ['Reenginering','Reenginering','Reenginering','Recbatt','Recbatt','CET','Validasi Inaktif Radio'];
-  const pos = ['4110006476','4110006233','4110006956','4110006744','4110006527','4110006599','4110006798','4110007034','4110006687','4110006769'];
-  const acts = ['2605000327','2606000267','2606000266','2606000269','2605000312','2606000270','2606000271','2606000280'];
+  const pos   = ['4110006476','4110006233','4110006956','4110006744','4110006527','4110006599','4110006798','4110007034','4110006687','4110006769'];
+  const acts  = ['2605000327','2606000267','2606000266','2606000269','2605000312','2606000270','2606000271','2606000280'];
   const months = [
-    {bulan:'December 2025',periode:'Desember',tahun:2025,w:1},
-    {bulan:'January 2026',periode:'Januari',tahun:2026,w:0},
-    {bulan:'February 2026',periode:'Februari',tahun:2026,w:2},
-    {bulan:'March 2026',periode:'Maret',tahun:2026,w:6},
-    {bulan:'April 2026',periode:'April',tahun:2026,w:7},
-    {bulan:'May 2026',periode:'Mei',tahun:2026,w:11},
-    {bulan:'June 2026',periode:'Juni',tahun:2026,w:28},
+    {periode:'Desember', tahun:2025, bulanTgl:'December 2025', w:1},
+    {periode:'Januari',  tahun:2026, bulanTgl:'January 2026',  w:0},
+    {periode:'Februari', tahun:2026, bulanTgl:'February 2026', w:2},
+    {periode:'Maret',    tahun:2026, bulanTgl:'March 2026',    w:6},
+    {periode:'April',    tahun:2026, bulanTgl:'April 2026',    w:7},
+    {periode:'Mei',      tahun:2026, bulanTgl:'May 2026',      w:11},
+    {periode:'Juni',     tahun:2026, bulanTgl:'June 2026',     w:28},
   ];
   let invNum = 229;
-  months.forEach(m => {
-    const count = Math.max(1, Math.round(m.w * 2.1));
+  months.forEach((m, mi) => {
+    const count = Math.max(m.w > 0 ? 1 : 0, Math.round(m.w * 2.1));
     for (let i = 0; i < count; i++) {
-      const tipe = tipes[Math.floor(Math.random() * tipes.length)];
-      const po = pos[Math.floor(Math.random() * pos.length)];
-      const act = acts[Math.floor(Math.random() * acts.length)];
-      const baseVal = tipe==='Reenginering' ? 150000000 : tipe==='Recbatt' ? 80000000 : tipe==='CET' ? 200000000 : 120000000;
-      const val = Math.round(baseVal * (0.5 + Math.random() * 2.5) / 1000) * 1000;
+      const tipe    = tipes[Math.floor(Math.random() * tipes.length)];
+      const po      = pos[Math.floor(Math.random() * pos.length)];
+      const act     = acts[Math.floor(Math.random() * acts.length)];
+      const baseVal = tipe==='Reenginering'?150e6 : tipe==='Recbatt'?80e6 : tipe==='CET'?200e6 : 120e6;
+      const val     = Math.round(baseVal * (0.5 + Math.random()*2.5) / 1000) * 1000;
       const bastNum = String(Math.floor(Math.random()*999)+1).padStart(3,'0');
+      const romawi  = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mi];
       invoices.push({
-        'No Invoice': `${invNum}-INV-ISM-${m.tahun.toString().slice(2)}-${String(months.indexOf(m)+1).padStart(2,'0')}`,
-        'ACT ID': act,
-        'No PO': po,
-        'No BAST': `${bastNum}/ISM-BAST/${po}/${['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][months.indexOf(m)]}/${m.tahun}`,
-        'Value Invoice': val,
-        'Periode': m.periode,
-        'Tahun': m.tahun,
-        'Bulan Tanggal': m.bulan,
+        'No Invoice':     `${invNum}-INV-ISM-${String(m.tahun).slice(2)}-${String(mi+1).padStart(2,'0')}`,
+        'ACT ID':         act,
+        'No PO':          po,
+        'No BAST':        `${bastNum}/ISM-BAST/${po}/${romawi}/${m.tahun}`,
+        'Value Invoice':  val,
+        'Periode':        m.periode,
+        'Tahun':          m.tahun,
+        'Bulan Tanggal':  m.bulanTgl,
         'Tipe Pekerjaan': tipe,
       });
       invNum++;
@@ -681,62 +600,105 @@ function generateDummyData() {
 
 // ─── ON DATA READY ────────────────────────────────────────────────────────────
 function onDataReady() {
-  const now = new Date();
   document.getElementById('data-update-date').textContent =
-    now.toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
-
+    new Date().toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
   populateFilters();
   applyFilters();
   hideLoading();
 }
 
-// ─── FILTERS ──────────────────────────────────────────────────────────────────
-function populateFilters() {
-  const tahuns = [...new Set(rawData.map(r => r['Tahun']))].sort();
-  const bulans = [...new Set(rawData.map(r => r['Bulan Tanggal']))].filter(Boolean);
-  const bulanOrder = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  bulans.sort((a,b) => {
-    const [ma,ya] = a.split(' '); const [mb,yb] = b.split(' ');
-    return (+ya - +yb) || (bulanOrder.indexOf(ma) - bulanOrder.indexOf(mb));
+// ─── HELPERS: SORTING PERIODE ─────────────────────────────────────────────────
+function periodeSort(a, b) {
+  // Expects format "NamaBulan" (ID) or "NamaBulan YYYY" or "NamaBulan YYYY" — compare tahun first, then bulan
+  // Data: {periode: "Juni", tahun: 2026}
+  // We sort by (tahun, bulan index)
+  return 0; // handled in groupByPeriode
+}
+
+// Group data by (Tahun + Periode) and return sorted keys as "Periode|Tahun"
+function groupByPeriode(data) {
+  const map = {};
+  data.forEach(r => {
+    const p = String(r['Periode'] || '').trim();
+    const t = String(r['Tahun']   || '').trim();
+    if (!p) return;
+    const key = `${p}|${t}`;
+    if (!map[key]) map[key] = 0;
+    map[key] += (+r['Value Invoice'] || 0);
   });
+
+  const keys = Object.keys(map).sort((a, b) => {
+    const [pa, ta] = a.split('|');
+    const [pb, tb] = b.split('|');
+    const ya = parseInt(ta) || 0, yb = parseInt(tb) || 0;
+    if (ya !== yb) return ya - yb;
+    const ia = periodeIndex(pa), ib = periodeIndex(pb);
+    return ia - ib;
+  });
+
+  return { map, keys };
+}
+
+function periodeIndex(p) {
+  let i = PERIODE_ORDER.indexOf(p);
+  if (i === -1) i = PERIODE_ORDER_EN.indexOf(p);
+  return i === -1 ? 99 : i;
+}
+
+function periodeLabel(key) {
+  const [p, t] = key.split('|');
+  return `${p} ${t}`;
+}
+
+// ─── POPULATE FILTERS ─────────────────────────────────────────────────────────
+function populateFilters() {
+  const tahuns   = [...new Set(rawData.map(r => String(r['Tahun']||'')))].filter(Boolean).sort();
+  const periodes = [...new Set(rawData.map(r => String(r['Periode']||'')))].filter(Boolean)
+    .sort((a,b) => periodeIndex(a) - periodeIndex(b));
   const tipes = [...new Set(rawData.map(r => r['Tipe Pekerjaan']))].filter(Boolean).sort();
   const poses = [...new Set(rawData.map(r => r['No PO']))].filter(Boolean).sort();
   const acts  = [...new Set(rawData.map(r => r['ACT ID']))].filter(Boolean).sort();
 
-  fillSelect('fTahun', tahuns);
-  fillSelect('fBulan', bulans);
-  fillSelect('fTipe',  tipes);
-  fillSelect('fPO',    poses);
-  fillSelect('fACT',   acts);
+  fillSelect('fTahun',   tahuns);
+  fillSelect('fPeriode', periodes);
+  fillSelect('fTipe',    tipes);
+  fillSelect('fPO',      poses);
+  fillSelect('fACT',     acts);
 }
+
 function fillSelect(id, vals) {
   const sel = document.getElementById(id);
   const cur = sel.value;
   sel.innerHTML = '<option value="">All</option>' +
     vals.map(v => `<option value="${v}"${v==cur?' selected':''}>${v}</option>`).join('');
 }
+
+// ─── FILTERS ──────────────────────────────────────────────────────────────────
 function applyFilters() {
-  const fT = document.getElementById('fTahun').value;
-  const fB = document.getElementById('fBulan').value;
-  const fTp= document.getElementById('fTipe').value;
-  const fP = document.getElementById('fPO').value;
-  const fA = document.getElementById('fACT').value;
+  const fT  = document.getElementById('fTahun').value;
+  const fP  = document.getElementById('fPeriode').value;
+  const fTp = document.getElementById('fTipe').value;
+  const fPO = document.getElementById('fPO').value;
+  const fA  = document.getElementById('fACT').value;
 
   filteredData = rawData.filter(r =>
-    (!fT  || String(r['Tahun']) === fT) &&
-    (!fB  || r['Bulan Tanggal'] === fB) &&
-    (!fTp || r['Tipe Pekerjaan'] === fTp) &&
-    (!fP  || r['No PO'] === fP) &&
-    (!fA  || r['ACT ID'] === fA)
+    (!fT  || String(r['Tahun'])         === fT)  &&
+    (!fP  || String(r['Periode'])       === fP)  &&
+    (!fTp || r['Tipe Pekerjaan']        === fTp) &&
+    (!fPO || r['No PO']                 === fPO) &&
+    (!fA  || r['ACT ID']               === fA)
   );
 
-  const periodeLabel = fB || (fT ? `Tahun ${fT}` : 'All Periode');
-  document.getElementById('sumPeriode').textContent = periodeLabel;
+  const periodeLabel2 = fP
+    ? (fT ? `${fP} ${fT}` : fP)
+    : (fT ? `Tahun ${fT}` : 'All Periode');
+  document.getElementById('sumPeriode').textContent = periodeLabel2;
 
   renderAll();
 }
+
 function resetFilters() {
-  ['fTahun','fBulan','fTipe','fPO','fACT'].forEach(id => document.getElementById(id).value = '');
+  ['fTahun','fPeriode','fTipe','fPO','fACT'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
 
@@ -751,7 +713,7 @@ function renderAll() {
   const avgVal   = totalInv ? totalVal / totalInv : 0;
 
   // KPI
-  document.getElementById('kpiTotalValue').textContent   = formatM(totalVal);
+  document.getElementById('kpiTotalValue').textContent    = formatM(totalVal);
   document.getElementById('kpiTotalValueSub').textContent = `${totalInv} Invoice`;
   document.getElementById('kpiTotalInvoice').textContent  = totalInv;
   document.getElementById('kpiTotalPO').textContent       = totalPO;
@@ -760,23 +722,11 @@ function renderAll() {
   document.getElementById('sumValue').textContent         = formatM(totalVal);
   document.getElementById('sumCount').textContent         = `${totalInv} Invoice`;
 
-  // by bulan
-  const bulanOrder = ['December 2025','January 2026','February 2026','March 2026','April 2026','May 2026','June 2026','July 2026','August 2026','September 2026','October 2026','November 2026','December 2026'];
-  const bulanMap = {};
-  data.forEach(r => {
-    const b = r['Bulan Tanggal'] || 'Unknown';
-    if (!bulanMap[b]) bulanMap[b] = 0;
-    bulanMap[b] += (+r['Value Invoice']||0);
-  });
-  const bulanKeys = Object.keys(bulanMap).sort((a,b) => {
-    const ia = bulanOrder.indexOf(a), ib = bulanOrder.indexOf(b);
-    if (ia===-1&&ib===-1) return a.localeCompare(b);
-    if (ia===-1) return 1; if (ib===-1) return -1;
-    return ia - ib;
-  });
+  // GROUP BY PERIODE (kolom Periode + Tahun)
+  const { map: periodeMap, keys: periodeKeys } = groupByPeriode(data);
 
-  // Trend line chart
-  renderTrend(bulanKeys, bulanMap);
+  // Trend
+  renderTrend(periodeKeys, periodeMap);
 
   // Donut by tipe
   const tipeMap = {};
@@ -794,91 +744,76 @@ function renderAll() {
     if (!poMap[p]) poMap[p] = 0;
     poMap[p] += (+r['Value Invoice']||0);
   });
-  const poSorted = Object.entries(poMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  renderBarPO(poSorted);
+  renderBarPO(Object.entries(poMap).sort((a,b)=>b[1]-a[1]).slice(0,10));
 
-  // Stacked by tipe+bulan
+  // Stacked by tipe x periode
   const allTipes = [...new Set(rawData.map(r=>r['Tipe Pekerjaan']))].filter(Boolean);
-  renderStacked(bulanKeys, bulanMap, allTipes, data);
+  renderStacked(periodeKeys, allTipes, data);
 
   // Monthly list
-  renderMonthlyList(bulanKeys, bulanMap);
+  renderMonthlyList(periodeKeys, periodeMap);
 
   // Distribusi
-  const distribBuckets = [
-    {label:'0 – 50 Juta', min:0, max:50e6},
-    {label:'50 – 100 Juta', min:50e6, max:100e6},
-    {label:'100 – 200 Juta', min:100e6, max:200e6},
-    {label:'200 – 500 Juta', min:200e6, max:500e6},
-    {label:'> 500 Juta', min:500e6, max:Infinity},
-  ];
-  renderDistrib(data, distribBuckets);
+  renderDistrib(data, [
+    {label:'0 – 50 Juta',     min:0,     max:50e6},
+    {label:'50 – 100 Juta',   min:50e6,  max:100e6},
+    {label:'100 – 200 Juta',  min:100e6, max:200e6},
+    {label:'200 – 500 Juta',  min:200e6, max:500e6},
+    {label:'> 500 Juta',      min:500e6, max:Infinity},
+  ]);
 
   // Table
   renderTable(data);
 }
 
 // ─── CHART: TREND ─────────────────────────────────────────────────────────────
-function renderTrend(labels, map) {
-  const vals = labels.map(l => map[l] / 1e6);
+function renderTrend(periodeKeys, periodeMap) {
+  const vals   = periodeKeys.map(k => periodeMap[k] / 1e6);
+  const labels = periodeKeys.map(k => { const [p,t] = k.split('|'); return `${p.substring(0,3)} '${String(t).slice(2)}`; });
+
   if (charts.trend) charts.trend.destroy();
   charts.trend = new Chart(document.getElementById('chartTrend'), {
     type: 'line',
     data: {
-      labels: labels.map(l => l.replace(' 2025','').replace(' 2026','')),
+      labels,
       datasets: [{
         data: vals,
         borderColor: '#f97316',
         backgroundColor: 'rgba(249,115,22,0.08)',
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#f97316',
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        borderWidth: 2,
+        fill: true, tension: 0.4,
+        pointBackgroundColor: '#f97316', pointRadius: 4, pointHoverRadius: 6, borderWidth: 2,
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ` Rp ${ctx.parsed.y.toFixed(2)} M` }
-        }
-      },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Rp ${ctx.parsed.y.toFixed(2)} M` } } },
       scales: {
         x: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 } } },
-        y: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 },
-          callback: v => `${v.toFixed(1)}M` } }
+        y: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 }, callback: v => `${v.toFixed(1)}M` } }
       }
     }
   });
-  // add labels above points
 }
 
 // ─── CHART: DONUT ─────────────────────────────────────────────────────────────
 function renderDonut(tipeMap, totalVal) {
   const entries = Object.entries(tipeMap).sort((a,b)=>b[1]-a[1]);
-  const labels  = entries.map(e=>e[0]);
-  const vals    = entries.map(e=>e[1]);
-  const colors  = labels.map(l => tipeColor(l));
-
-  const totalM = totalVal / 1e9;
-  document.getElementById('donutCenter').textContent = totalM.toFixed(2);
+  document.getElementById('donutCenter').textContent = (totalVal/1e9).toFixed(2);
 
   if (charts.donut) charts.donut.destroy();
   charts.donut = new Chart(document.getElementById('chartDonut'), {
     type: 'doughnut',
-    data: { labels, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#1c1c1c', hoverOffset: 6 }] },
+    data: {
+      labels: entries.map(e=>e[0]),
+      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: entries.map(e=>tipeColor(e[0])), borderWidth: 2, borderColor: '#1c1c1c', hoverOffset: 6 }]
+    },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '65%',
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => ` ${ctx.label}: ${formatM(ctx.parsed)}` }
-      }}
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${formatM(ctx.parsed)}` } } }
     }
   });
 
-  const leg = document.getElementById('donutLegend');
-  leg.innerHTML = entries.map(([t,v]) => {
+  document.getElementById('donutLegend').innerHTML = entries.map(([t,v]) => {
     const pct = totalVal ? ((v/totalVal)*100).toFixed(1) : 0;
     return `<div class="legend-row">
       <span class="legend-dot" style="background:${tipeColor(t)}"></span>
@@ -891,48 +826,42 @@ function renderDonut(tipeMap, totalVal) {
 
 // ─── CHART: BAR PO ────────────────────────────────────────────────────────────
 function renderBarPO(poSorted) {
-  const h = Math.max(180, poSorted.length * 26 + 40);
-  document.getElementById('barPOWrap').style.height = h + 'px';
+  document.getElementById('barPOWrap').style.height = Math.max(180, poSorted.length*26+40)+'px';
   if (charts.barPO) charts.barPO.destroy();
   charts.barPO = new Chart(document.getElementById('chartBarPO'), {
     type: 'bar',
     data: {
       labels: poSorted.map(e=>e[0]),
-      datasets: [{
-        data: poSorted.map(e=>e[1]/1e6),
-        backgroundColor: poSorted.map((_,i) => i===0?'#e63c2f':'#f97316'),
-        borderRadius: 4,
-        barThickness: 16,
-      }]
+      datasets: [{ data: poSorted.map(e=>e[1]/1e6), backgroundColor: poSorted.map((_,i)=>i===0?'#e63c2f':'#f97316'), borderRadius:4, barThickness:16 }]
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Rp ${ctx.parsed.x.toFixed(2)} M` } } },
       scales: {
-        x: { grid: { color: '#222' }, ticks: { color: '#888', font:{size:10}, callback: v=>`${v.toFixed(0)}M` } },
-        y: { grid: { display:false }, ticks: { color: '#bbb', font:{size:10} } }
+        x: { grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>`${v.toFixed(0)}M`} },
+        y: { grid:{display:false}, ticks:{color:'#bbb',font:{size:10}} }
       }
     }
   });
 }
 
 // ─── CHART: STACKED ───────────────────────────────────────────────────────────
-function renderStacked(bulanKeys, bulanMap, allTipes, data) {
-  const tipeDatasets = allTipes.map(t => {
-    const vals = bulanKeys.map(b => {
-      return data.filter(r=>r['Bulan Tanggal']===b && r['Tipe Pekerjaan']===t)
-        .reduce((s,r)=>s+(+r['Value Invoice']||0),0) / 1e6;
-    });
-    return { label: t, data: vals, backgroundColor: tipeColor(t), stack: 'a', borderRadius:2, barThickness:20 };
-  });
+function renderStacked(periodeKeys, allTipes, data) {
+  const labels = periodeKeys.map(k => { const [p,t]=k.split('|'); return `${p.substring(0,3)} '${String(t).slice(2)}`; });
+  const datasets = allTipes.map(t => ({
+    label: t,
+    data: periodeKeys.map(k => {
+      const [p, yr] = k.split('|');
+      return data.filter(r => String(r['Periode'])===p && String(r['Tahun'])===yr && r['Tipe Pekerjaan']===t)
+        .reduce((s,r) => s+(+r['Value Invoice']||0), 0) / 1e6;
+    }),
+    backgroundColor: tipeColor(t), stack: 'a', borderRadius: 2, barThickness: 20,
+  }));
 
   if (charts.stacked) charts.stacked.destroy();
   charts.stacked = new Chart(document.getElementById('chartStacked'), {
     type: 'bar',
-    data: {
-      labels: bulanKeys.map(l=>l.replace(' 2025','').replace(' 2026','')),
-      datasets: tipeDatasets
-    },
+    data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} M` } } },
@@ -945,15 +874,14 @@ function renderStacked(bulanKeys, bulanMap, allTipes, data) {
 }
 
 // ─── MONTHLY LIST ─────────────────────────────────────────────────────────────
-function renderMonthlyList(keys, map) {
-  const sorted = [...keys].reverse().slice(0,7);
-  const el = document.getElementById('monthlyList');
-  el.innerHTML = sorted.map(b => `
+function renderMonthlyList(periodeKeys, periodeMap) {
+  const sorted = [...periodeKeys].reverse().slice(0, 7);
+  document.getElementById('monthlyList').innerHTML = sorted.map(k => `
     <div class="monthly-item">
       <div class="monthly-icon">📈</div>
       <div class="monthly-info">
-        <div class="monthly-month">${b}</div>
-        <div class="monthly-amt">Rp ${(map[b]/1e6).toFixed(2)} M</div>
+        <div class="monthly-month">${periodeLabel(k)}</div>
+        <div class="monthly-amt">Rp ${(periodeMap[k]/1e6).toFixed(2)} M</div>
       </div>
     </div>
   `).join('');
@@ -961,15 +889,9 @@ function renderMonthlyList(keys, map) {
 
 // ─── DISTRIBUSI ───────────────────────────────────────────────────────────────
 function renderDistrib(data, buckets) {
-  const counts = buckets.map(b =>
-    data.filter(r => {
-      const v = +r['Value Invoice']||0;
-      return v >= b.min && v < b.max;
-    }).length
-  );
-  const total = counts.reduce((a,b)=>a+b,0) || 1;
-  const el = document.getElementById('distribList');
-  el.innerHTML = buckets.map((b,i) => {
+  const counts = buckets.map(b => data.filter(r => { const v=+r['Value Invoice']||0; return v>=b.min&&v<b.max; }).length);
+  const total  = counts.reduce((a,b)=>a+b,0)||1;
+  document.getElementById('distribList').innerHTML = buckets.map((b,i) => {
     const pct = ((counts[i]/total)*100).toFixed(1);
     return `<div class="distrib-row">
       <span class="distrib-label">${b.label}</span>
@@ -981,15 +903,14 @@ function renderDistrib(data, buckets) {
 
 // ─── TABLE ────────────────────────────────────────────────────────────────────
 function renderTable(data) {
-  const shown = showAll ? data : data.slice(0,8);
+  const shown = showAll ? data : data.slice(0, 8);
   document.getElementById('seeAllBtn').textContent =
-    showAll ? '↑ Semua ditampilkan' : `Lihat semua data (${data.length}) →`;
+    showAll ? '↑ Tampilkan lebih sedikit' : `Lihat semua data (${data.length}) →`;
 
   const tipeBadge = t => {
     const cls = t==='Reenginering'?'badge-red': t==='Recbatt'?'badge-orange': t==='CET'?'badge-yellow':'badge-pink';
     return `<span class="badge ${cls}">${t}</span>`;
   };
-
   document.getElementById('tableBody').innerHTML = shown.map(r => `
     <tr>
       <td>${r['No Invoice']||'–'}</td>
@@ -1009,19 +930,14 @@ function toggleShowAll() { showAll = !showAll; renderTable(filteredData); }
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function formatM(v) {
   const m = v / 1e9;
-  if (Math.abs(m) >= 1) return `Rp ${m.toFixed(2)} M`;
-  return `Rp ${(v/1e6).toFixed(2)} Jt`;
+  return Math.abs(m) >= 1 ? `Rp ${m.toFixed(2)} M` : `Rp ${(v/1e6).toFixed(2)} Jt`;
 }
-function formatJuta(v) {
-  return `Rp ${(v/1e6).toFixed(2)} Juta`;
-}
+function formatJuta(v) { return `Rp ${(v/1e6).toFixed(2)} Juta`; }
 function showLoading(msg) {
   document.getElementById('loadingText').textContent = msg || 'Memuat…';
   document.getElementById('loadingOverlay').style.display = 'flex';
 }
-function hideLoading() {
-  document.getElementById('loadingOverlay').style.display = 'none';
-}
+function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
 </script>
 </body>
 </html>
