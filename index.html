@@ -110,6 +110,39 @@
   .badge-green  { background: rgba(34,197,94,0.2);  color: #4ade80; }
   .badge-gray   { background: rgba(148,163,184,0.2); color: #94a3b8; }
 
+  .inv-link { color: var(--orange); font-weight: 600; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; transition: text-decoration-color 0.15s; }
+  .inv-link:hover { text-decoration-color: var(--orange); }
+
+  .modal-lg { width: 920px; max-width: 94vw; max-height: 88vh; overflow-y: auto; }
+  .detail-close-btn {
+    position: absolute; top: 16px; right: 16px; width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 50%;
+    color: var(--muted); font-size: 15px; cursor: pointer;
+  }
+  .detail-info-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px 16px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 16px;
+  }
+  .detail-info-item .di-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+  .detail-info-item .di-val { font-size: 13px; font-weight: 600; color: var(--text); }
+  .detail-pdf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, var(--red), var(--orange)); color: white;
+    font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 6px;
+    text-decoration: none; border: none; cursor: pointer;
+  }
+  .btn-pdf.disabled { background: var(--bg3); color: var(--muted); cursor: not-allowed; border: 1px dashed var(--border); }
+  .detail-section-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+  .detail-table-wrap { max-height: 340px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .detail-table-wrap table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .detail-table-wrap th { position: sticky; top: 0; background: var(--bg3); color: var(--muted); text-align: left; padding: 8px 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; white-space: nowrap; }
+  .detail-table-wrap td { padding: 8px 10px; border-top: 1px solid var(--border); white-space: nowrap; }
+  .detail-table-wrap tfoot td { font-weight: 700; color: white; border-top: 2px solid var(--border); background: rgba(255,255,255,0.02); }
+  .detail-empty { padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+
   /* LOADING */
   .loading-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 14px; }
   .spinner { width: 40px; height: 40px; border: 3px solid #2a2a2a; border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -241,6 +274,10 @@
 
     /* MODAL */
     .modal { width: 92vw; padding: 18px; }
+    .modal-lg { max-height: 84vh; }
+    .detail-info-grid { grid-template-columns: repeat(2, 1fr); }
+    .detail-table-wrap table { font-size: 10px; }
+    .detail-table-wrap th, .detail-table-wrap td { padding: 6px 8px; }
 
     /* BOTTOM NAV */
     .bottom-nav {
@@ -300,8 +337,13 @@
         <div class="ds-id">1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q</div>
         <div class="connected-badge">✓ Siap digunakan</div>
       </div>
+      <div class="config-hint" style="margin-top:8px">
+        Untuk fitur detail invoice: tambahkan kolom <strong>Link PDF</strong> di sheet utama, dan buat tab terpisah bernama sesuai di bawah dengan kolom <strong>No Invoice, PO Item, Nama Pekerjaan, Price Per Unit, Qty, Unit, Total Price, Total Billed, Delivery Progress (%), GR Amount, GR Progress (%), Balance, ACT ID, Site ID</strong>.
+      </div>
       <label class="modal-label">Nama Tab Sheet</label>
       <input type="text" id="defaultSheetName" placeholder="Sheet1" value="Sheet1">
+      <label class="modal-label">Nama Tab Detail Item (untuk detail invoice)</label>
+      <input type="text" id="defaultDetailSheetName" placeholder="Detail" value="Detail">
       <div class="error-msg" id="defaultError"></div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="hideConfig()">Batal</button>
@@ -320,6 +362,11 @@
       <input type="text" id="sheetIdInput" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
       <label class="modal-label">Nama Tab Sheet</label>
       <input type="text" id="sheetNameInput" placeholder="Sheet1" value="Sheet1">
+      <label class="modal-label">Nama Tab Detail Item (untuk detail invoice)</label>
+      <input type="text" id="detailSheetNameInput" placeholder="Detail" value="Detail">
+      <div class="config-hint" style="margin-top:4px;margin-bottom:10px">
+        Tab detail butuh kolom: No Invoice, PO Item, Nama Pekerjaan, Price Per Unit, Qty, Unit, Total Price, Total Billed, Delivery Progress (%), GR Amount, GR Progress (%), Balance, ACT ID, Site ID.
+      </div>
       <div class="error-msg" id="configError"></div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="hideConfig()">Batal</button>
@@ -340,6 +387,33 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- INVOICE DETAIL MODAL -->
+<div class="modal-overlay" id="invoiceDetailModal" style="display:none">
+  <div class="modal modal-lg" style="position:relative">
+    <button class="detail-close-btn" onclick="closeInvoiceDetail()" aria-label="Tutup">✕</button>
+    <h3 id="detailModalTitle">📄 Detail Invoice</h3>
+
+    <div class="detail-info-grid" id="detailInfoGrid"></div>
+
+    <div class="detail-pdf-row" id="detailPdfRow"></div>
+
+    <div class="detail-section-title">Detail Item / Site</div>
+    <div class="detail-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th><th>PO Item</th><th>Nama Pekerjaan</th><th>Site ID</th><th>ACT ID</th>
+            <th>Harga Satuan</th><th>Qty</th><th>Unit</th><th>Total Price</th><th>Total Billed</th>
+            <th>Delivery %</th><th>GR Amount</th><th>GR %</th><th>Balance</th>
+          </tr>
+        </thead>
+        <tbody id="detailItemsBody"></tbody>
+        <tfoot id="detailItemsFoot"></tfoot>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -565,6 +639,7 @@
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const DEFAULT_SHEET_ID   = '1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q';
 const DEFAULT_SHEET_NAME = 'Sheet1';
+const DEFAULT_DETAIL_SHEET_NAME = 'Detail';
 
 // Urutan bulan Indonesia untuk sorting kolom Periode
 const PERIODE_ORDER = [
@@ -588,25 +663,36 @@ function tipeColor(t) { return TIPE_COLORS[t] || '#888'; }
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let rawData      = [];
 let filteredData = [];
+let detailData   = [];
+let currentTableRows = [];
 let showAll      = false;
 let charts       = {};
 let activeTab    = 'default';
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.table-wrap')?.addEventListener('click', e => {
+    const link = e.target.closest('.inv-link');
+    if (!link) return;
+    const idx = parseInt(link.dataset.idx, 10);
+    const row = currentTableRows[idx];
+    if (row) openInvoiceDetail(row);
+  });
+
   const savedId   = localStorage.getItem('inv_sheet_id');
   const savedName = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
+  const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
   const savedSrc  = localStorage.getItem('inv_source') || 'default';
 
   if (savedSrc === 'demo') {
     loadDemo();
   } else if (savedSrc === 'custom' && savedId) {
     setSourceIndicator('Custom Sheet');
-    fetchSheetData(savedId, savedName);
+    fetchSheetData(savedId, savedName, savedDetailName);
   } else {
     // default
     setSourceIndicator('Sheet Default');
-    fetchSheetData(DEFAULT_SHEET_ID, savedName);
+    fetchSheetData(DEFAULT_SHEET_ID, savedName, savedDetailName);
   }
 });
 
@@ -626,6 +712,83 @@ function scrollToTable() {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ─── INVOICE DETAIL MODAL ───────────────────────────────────────────────────────
+function openInvoiceDetail(inv) {
+  const noInv = inv['No Invoice'];
+  document.getElementById('detailModalTitle').textContent = `📄 Detail Invoice — ${noInv}`;
+
+  const statusRaw = String(inv['Paid']||'').trim().toLowerCase();
+  const statusHtml = statusRaw === 'paid'
+    ? `<span class="badge badge-green">Paid</span>`
+    : statusRaw === 'unpaid'
+      ? `<span class="badge badge-gray">Unpaid</span>`
+      : `<span class="badge badge-gray">–</span>`;
+
+  document.getElementById('detailInfoGrid').innerHTML = `
+    <div class="detail-info-item"><div class="di-label">ACT ID</div><div class="di-val">${inv['ACT ID']||'–'}</div></div>
+    <div class="detail-info-item"><div class="di-label">No PO</div><div class="di-val">${inv['No PO']||'–'}</div></div>
+    <div class="detail-info-item"><div class="di-label">No BAST</div><div class="di-val">${inv['No BAST']||'–'}</div></div>
+    <div class="detail-info-item"><div class="di-label">Status</div><div class="di-val">${statusHtml}</div></div>
+    <div class="detail-info-item"><div class="di-label">Periode</div><div class="di-val">${inv['Periode']||'–'} ${inv['Tahun']||''}</div></div>
+    <div class="detail-info-item"><div class="di-label">Tipe Pekerjaan</div><div class="di-val">${inv['Tipe Pekerjaan']||'–'}</div></div>
+    <div class="detail-info-item"><div class="di-label">Value Invoice</div><div class="di-val" style="color:var(--orange)">Rp ${Number(inv['Value Invoice']||0).toLocaleString('id-ID')}</div></div>
+    <div class="detail-info-item"><div class="di-label">Bulan Tanggal</div><div class="di-val">${inv['Bulan Tanggal']||'–'}</div></div>
+  `;
+
+  // PDF button
+  const pdfLink = String(inv['Link PDF']||'').trim();
+  document.getElementById('detailPdfRow').innerHTML = pdfLink
+    ? `<a class="btn-pdf" href="${pdfLink}" target="_blank" rel="noopener">📄 Buka PDF Invoice</a>`
+    : `<span class="btn-pdf disabled">📄 PDF belum tersedia</span>`;
+
+  // Line items
+  const items = detailData.filter(d => d['No Invoice'] === noInv);
+  const body = document.getElementById('detailItemsBody');
+  const foot = document.getElementById('detailItemsFoot');
+
+  if (!items.length) {
+    body.innerHTML = `<tr><td colspan="14" class="detail-empty">Belum ada data detail item untuk invoice ini.</td></tr>`;
+    foot.innerHTML = '';
+  } else {
+    body.innerHTML = items.map((it, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${it['PO Item']||'–'}</td>
+        <td>${it['Nama Pekerjaan']||'–'}</td>
+        <td>${it['Site ID']||'–'}</td>
+        <td>${it['ACT ID']||'–'}</td>
+        <td>${Number(it['Price Per Unit']||0).toLocaleString('id-ID')}</td>
+        <td>${it['Qty']||'–'}</td>
+        <td>${it['Unit']||'–'}</td>
+        <td>${Number(it['Total Price']||0).toLocaleString('id-ID')}</td>
+        <td>${Number(it['Total Billed']||0).toLocaleString('id-ID')}</td>
+        <td>${it['Delivery Progress (%)']||0}%</td>
+        <td>${Number(it['GR Amount']||0).toLocaleString('id-ID')}</td>
+        <td>${it['GR Progress (%)']||0}%</td>
+        <td>${Number(it['Balance']||0).toLocaleString('id-ID')}</td>
+      </tr>
+    `).join('');
+
+    const sum = key => items.reduce((s,it) => s + (+it[key]||0), 0);
+    foot.innerHTML = `
+      <tr>
+        <td colspan="8">TOTAL</td>
+        <td>${sum('Total Price').toLocaleString('id-ID')}</td>
+        <td>${sum('Total Billed').toLocaleString('id-ID')}</td>
+        <td>–</td>
+        <td>${sum('GR Amount').toLocaleString('id-ID')}</td>
+        <td>–</td>
+        <td>${sum('Balance').toLocaleString('id-ID')}</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById('invoiceDetailModal').style.display = 'flex';
+}
+function closeInvoiceDetail() {
+  document.getElementById('invoiceDetailModal').style.display = 'none';
+}
+
 // ─── TAB SWITCH ───────────────────────────────────────────────────────────────
 function switchTab(tab) {
   activeTab = tab;
@@ -641,6 +804,9 @@ function switchTab(tab) {
 function openConfig() {
   const src = localStorage.getItem('inv_source') || 'default';
   switchTab(src === 'custom' ? 'custom' : src === 'demo' ? 'demo' : 'default');
+  const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
+  document.getElementById('defaultDetailSheetName').value = savedDetailName;
+  document.getElementById('detailSheetNameInput').value   = savedDetailName;
   if (src === 'custom') {
     document.getElementById('sheetIdInput').value   = localStorage.getItem('inv_sheet_id') || '';
     document.getElementById('sheetNameInput').value = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
@@ -653,26 +819,30 @@ function hideConfig() {
 
 function connectDefault() {
   const name = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
+  const detailName = document.getElementById('defaultDetailSheetName').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   localStorage.setItem('inv_source',     'default');
   localStorage.setItem('inv_sheet_name', name);
+  localStorage.setItem('inv_detail_sheet_name', detailName);
   localStorage.removeItem('inv_sheet_id');
   hideConfig();
   setSourceIndicator('Sheet Default');
   showLoading('Menghubungkan ke Sheet Default…');
-  fetchSheetData(DEFAULT_SHEET_ID, name);
+  fetchSheetData(DEFAULT_SHEET_ID, name, detailName);
 }
 
 function connectCustom() {
   const id   = document.getElementById('sheetIdInput').value.trim();
   const name = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
+  const detailName = document.getElementById('detailSheetNameInput').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   if (!id) { showErr('configError', 'Sheet ID tidak boleh kosong.'); return; }
   localStorage.setItem('inv_source',     'custom');
   localStorage.setItem('inv_sheet_id',   id);
   localStorage.setItem('inv_sheet_name', name);
+  localStorage.setItem('inv_detail_sheet_name', detailName);
   hideConfig();
   setSourceIndicator('Custom Sheet');
   showLoading('Mengambil data dari Google Sheets…');
-  fetchSheetData(id, name);
+  fetchSheetData(id, name, detailName);
 }
 
 function useDummyData() {
@@ -684,7 +854,11 @@ function useDummyData() {
 }
 function loadDemo() {
   showLoading('Memuat data demo…');
-  setTimeout(() => { rawData = generateDummyData(); onDataReady(); }, 600);
+  setTimeout(() => {
+    rawData = generateDummyData();
+    detailData = generateDummyDetailData(rawData);
+    onDataReady();
+  }, 600);
 }
 
 function showErr(id, msg) {
@@ -696,7 +870,7 @@ function setSourceIndicator(label) {
 }
 
 // ─── FETCH SHEET ──────────────────────────────────────────────────────────────
-function fetchSheetData(sheetId, sheetName) {
+function fetchSheetData(sheetId, sheetName, detailSheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
   fetch(url)
     .then(r => r.text())
@@ -708,12 +882,32 @@ function fetchSheetData(sheetId, sheetName) {
       } catch(e) {
         hideLoading();
         showConfig_withError('Gagal parsing data. Cek apakah sheet sudah dibagikan (Anyone with link – Viewer).');
+        return;
       }
+      // Detail sheet is best-effort: fetch it separately so its failure never blocks the main dashboard
+      fetchDetailSheetData(sheetId, detailSheetName || DEFAULT_DETAIL_SHEET_NAME);
     })
     .catch(() => {
       hideLoading();
       showConfig_withError('Gagal terhubung. Cek Sheet ID dan koneksi internet.');
     });
+}
+
+// Best-effort fetch of the line-item detail tab. Silently results in an empty
+// detailData array if the tab doesn't exist yet, so it never breaks the dashboard.
+function fetchDetailSheetData(sheetId, detailSheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(detailSheetName)}`;
+  fetch(url)
+    .then(r => r.text())
+    .then(text => {
+      try {
+        const json = JSON.parse(text.substring(47, text.length - 2));
+        detailData = parseGvizDetailData(json);
+      } catch(e) {
+        detailData = [];
+      }
+    })
+    .catch(() => { detailData = []; });
 }
 function showConfig_withError(msg) {
   openConfig();
@@ -722,6 +916,21 @@ function showConfig_withError(msg) {
 }
 
 function parseGvizData(json) {
+  const cols = json.table.cols.map(c => c.label);
+  return json.table.rows
+    .map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = row.c[i];
+        obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
+      });
+      return obj;
+    })
+    .filter(r => r['No Invoice']);
+}
+
+// Parses the "Detail" tab (line items per invoice: PO Item, Nama Pekerjaan, etc.)
+function parseGvizDetailData(json) {
   const cols = json.table.cols.map(c => c.label);
   return json.table.rows
     .map(row => {
@@ -762,8 +971,9 @@ function generateDummyData() {
       const bastNum = String(Math.floor(Math.random()*999)+1).padStart(3,'0');
       const romawi  = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mi];
       const paid    = Math.random() < 0.65 ? 'Paid' : 'Unpaid';
+      const noInvoice = `${invNum}-INV-ISM-${String(m.tahun).slice(2)}-${String(mi+1).padStart(2,'0')}`;
       invoices.push({
-        'No Invoice':     `${invNum}-INV-ISM-${String(m.tahun).slice(2)}-${String(mi+1).padStart(2,'0')}`,
+        'No Invoice':     noInvoice,
         'ACT ID':         act,
         'No PO':          po,
         'No BAST':        `${bastNum}/ISM-BAST/${po}/${romawi}/${m.tahun}`,
@@ -773,11 +983,54 @@ function generateDummyData() {
         'Bulan Tanggal':  m.bulanTgl,
         'Tipe Pekerjaan': tipe,
         'Paid':           paid,
+        'Link PDF':       '',
       });
       invNum++;
     }
   });
   return invoices;
+}
+
+// Generates synthetic line-item detail rows for each demo invoice, so the
+// invoice-detail modal can be previewed without a real "Detail" sheet tab.
+function generateDummyDetailData(invoices) {
+  const siteNames = ['PAD019','PAD185','PAD503','PAD542','PAD572','BKS021','BKS114','TGR087'];
+  const jobs = [
+    { name: 'Dismantle ANT3_Sum', price: 869400 },
+    { name: 'Reposisi RRU+Ins Mat_Sum', price: 1938418 },
+    { name: 'Site Survey_Sum', price: 433382 },
+    { name: 'Antenna Modernization Service Onl', price: 15264802 },
+    { name: '1st Tier Optim (2 Tech)_Sum', price: 5930550 },
+  ];
+  const rows = [];
+  let poItem = 10;
+  invoices.forEach(inv => {
+    const lineCount = 1 + Math.floor(Math.random() * 3);
+    const site = siteNames[Math.floor(Math.random() * siteNames.length)];
+    for (let i = 0; i < lineCount; i++) {
+      const job = jobs[Math.floor(Math.random() * jobs.length)];
+      const qty = 1 + Math.floor(Math.random() * 3);
+      const total = job.price * qty;
+      rows.push({
+        'No Invoice':             inv['No Invoice'],
+        'PO Item':                poItem,
+        'Nama Pekerjaan':         `${site}_${job.name}`,
+        'Price Per Unit':         job.price,
+        'Qty':                    qty,
+        'Unit':                   'UNT',
+        'Total Price':            total,
+        'Total Billed':           total,
+        'Delivery Progress (%)':  100,
+        'GR Amount':              total,
+        'GR Progress (%)':        100,
+        'Balance':                0,
+        'ACT ID':                 inv['ACT ID'],
+        'Site ID':                site,
+      });
+      poItem += 10;
+    }
+  });
+  return rows;
 }
 
 // ─── ON DATA READY ────────────────────────────────────────────────────────────
@@ -1112,9 +1365,9 @@ function renderTable(data) {
     if (norm === 'unpaid') return `<span class="badge badge-gray">Unpaid</span>`;
     return `<span class="badge badge-gray">–</span>`;
   };
-  document.getElementById('tableBody').innerHTML = shown.map(r => `
+  document.getElementById('tableBody').innerHTML = shown.map((r,i) => `
     <tr>
-      <td>${r['No Invoice']||'–'}</td>
+      <td><span class="inv-link" data-idx="${i}">${r['No Invoice']||'–'}</span></td>
       <td>${r['ACT ID']||'–'}</td>
       <td>${r['No PO']||'–'}</td>
       <td style="font-size:10px;color:var(--muted)">${r['No BAST']||'–'}</td>
@@ -1126,6 +1379,7 @@ function renderTable(data) {
       <td>${statusBadge(r['Paid'])}</td>
     </tr>
   `).join('');
+  currentTableRows = shown;
 }
 function toggleShowAll() { showAll = !showAll; renderTable(filteredData); }
 
