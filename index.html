@@ -147,6 +147,127 @@
   .config-hint code { color: var(--orange); font-size: 11px; }
   .source-indicator { font-size: 10px; color: var(--muted); }
   .source-indicator span { color: var(--orange); font-weight: 600; }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     MOBILE FILTER DRAWER + BOTTOM NAV (hidden on desktop by default)
+  ═══════════════════════════════════════════════════════════════════════ */
+  .drawer-overlay { display: none; }
+  .drawer-close-btn { display: none; }
+  .bottom-nav { display: none; }
+  .mobile-only { display: none; }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TABLET (≤ 1024px) — 5-col KPI → 3-col, trim side-column charts
+  ═══════════════════════════════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .kpi-row { grid-template-columns: repeat(3, 1fr); }
+    .charts-row-2 { grid-template-columns: 1fr 1fr; }
+    .charts-row-2 .chart-card:nth-child(3) { grid-column: 1 / -1; }
+    .charts-row-3 { grid-template-columns: 1fr; }
+    .sidebar { width: 168px; min-width: 168px; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     MOBILE (≤ 768px) — stacked layout, drawer filter, bottom nav
+  ═══════════════════════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    body { font-size: 13px; padding-bottom: 62px; } /* room for bottom nav */
+
+    /* HEADER */
+    .header { padding: 12px 14px; }
+    .logo { width: 36px; height: 36px; font-size: 16px; border-radius: 8px; }
+    .header-title h1 { font-size: 14px; letter-spacing: 0.5px; }
+    .header-title h2 { font-size: 10px; }
+    .header-title p  { font-size: 9px; }
+    .header-right .label { font-size: 9px; }
+    .header-right .date  { font-size: 11px; }
+    .header-right button.btn-primary { display: none; } /* moved into bottom nav */
+    .source-indicator { font-size: 9px; }
+
+    /* MAIN LAYOUT — sidebar becomes off-canvas drawer */
+    .main { display: block; min-height: auto; }
+
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100dvh; width: 84vw; max-width: 300px;
+      z-index: 9200; transform: translateX(-100%); transition: transform 0.28s ease;
+      overflow-y: auto; padding: 18px 14px 90px; box-shadow: 8px 0 24px rgba(0,0,0,0.5);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar .drawer-close-btn {
+      display: flex; align-items: center; justify-content: center;
+      position: absolute; top: 12px; right: 12px; width: 30px; height: 30px;
+      background: var(--bg3); border: 1px solid var(--border); border-radius: 50%;
+      color: var(--muted); font-size: 15px; cursor: pointer;
+    }
+    .filter-title { padding-right: 30px; }
+
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 9100;
+    }
+    .drawer-overlay.open { display: block; }
+
+    /* CONTENT */
+    .content { padding: 12px; gap: 12px; }
+
+    /* KPI — horizontal snap-scroll row of cards instead of a cramped grid */
+    .kpi-row {
+      display: flex; grid-template-columns: none; gap: 8px;
+      overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 2px;
+      margin: 0 -12px; padding-left: 12px; padding-right: 12px;
+    }
+    .kpi-row::-webkit-scrollbar { display: none; }
+    .kpi-card { min-width: 158px; scroll-snap-align: start; flex-shrink: 0; padding: 10px 12px; }
+    .kpi-val { font-size: 17px; }
+    .kpi-icon { width: 30px; height: 30px; font-size: 14px; }
+
+    /* CHARTS — everything stacks to one column */
+    .charts-row-1, .charts-row-2, .charts-row-3 { grid-template-columns: 1fr; }
+    .charts-row-2 .chart-card:nth-child(3) { grid-column: auto; }
+    .chart-card { padding: 12px; }
+    .chart-wrap { height: 220px !important; }
+    #barPOWrap { height: auto !important; min-height: 200px; }
+
+    .donut-area { flex-direction: column; align-items: stretch; gap: 12px; }
+    .donut-wrap { width: 150px; height: 150px; margin: 0 auto; }
+    .donut-legend { width: 100%; }
+
+    /* TABLE — allow horizontal scroll, keep font readable */
+    .table-card { padding: 12px; }
+    .table-wrap { -webkit-overflow-scrolling: touch; }
+    th, td { padding: 8px; font-size: 10.5px; white-space: nowrap; }
+
+    /* MODAL */
+    .modal { width: 92vw; padding: 18px; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
+      background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
+      border-top: 1px solid var(--border); padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+      justify-content: space-around; align-items: center;
+    }
+    .bottom-nav-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      background: none; border: none; color: var(--muted); font-size: 9px;
+      font-weight: 600; letter-spacing: 0.3px; cursor: pointer; padding: 4px 10px;
+      flex: 1;
+    }
+    .bottom-nav-btn .bn-icon { font-size: 17px; line-height: 1; }
+    .bottom-nav-btn.primary { color: var(--orange); }
+    .bottom-nav-btn.primary .bn-icon {
+      width: 30px; height: 30px; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, var(--red), var(--orange)); border-radius: 50%; color: white; font-size: 14px;
+    }
+
+    .mobile-only { display: block; }
+  }
+
+  /* Small phones */
+  @media (max-width: 380px) {
+    .kpi-card { min-width: 140px; }
+    .header-title p { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -240,10 +361,15 @@
   </div>
 </div>
 
+
+<!-- DRAWER OVERLAY (mobile only) -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeFilterDrawer()"></div>
+
 <!-- MAIN -->
 <div class="main">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
+  <!-- SIDEBAR / MOBILE FILTER DRAWER -->
+  <div class="sidebar" id="sidebar">
+    <button class="drawer-close-btn" onclick="closeFilterDrawer()" aria-label="Tutup filter">✕</button>
     <div class="filter-title">⬡ FILTER</div>
     <div class="filter-group">
       <label>Tahun</label>
@@ -397,6 +523,22 @@
   </div>
 </div>
 
+<!-- BOTTOM NAV (mobile only) -->
+<div class="bottom-nav">
+  <button class="bottom-nav-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <span class="bn-icon">📊</span>KPI
+  </button>
+  <button class="bottom-nav-btn" onclick="openFilterDrawer()">
+    <span class="bn-icon">⬡</span>Filter
+  </button>
+  <button class="bottom-nav-btn primary" onclick="openConfig()">
+    <span class="bn-icon">⚙</span>Sheet
+  </button>
+  <button class="bottom-nav-btn" onclick="scrollToTable()">
+    <span class="bn-icon">📋</span>Tabel
+  </button>
+</div>
+
 <script>
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const DEFAULT_SHEET_ID   = '1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q';
@@ -445,6 +587,22 @@ window.addEventListener('DOMContentLoaded', () => {
     fetchSheetData(DEFAULT_SHEET_ID, savedName);
   }
 });
+
+// ─── MOBILE FILTER DRAWER ───────────────────────────────────────────────────────
+function openFilterDrawer() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeFilterDrawer() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function scrollToTable() {
+  const el = document.querySelector('.table-card');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // ─── TAB SWITCH ───────────────────────────────────────────────────────────────
 function switchTab(tab) {
