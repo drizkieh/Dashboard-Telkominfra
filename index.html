@@ -46,7 +46,7 @@
   .content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; overflow-x: hidden; }
 
   /* KPI */
-  .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
   .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
   .kpi-icon { width: 36px; height: 36px; background: rgba(233,63,47,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
   .kpi-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -107,6 +107,8 @@
   .badge-orange { background: rgba(249,115,22,0.2); color: var(--orange); }
   .badge-yellow { background: rgba(234,179,8,0.2); color: var(--yellow); }
   .badge-pink   { background: rgba(236,72,153,0.2); color: #f472b6; }
+  .badge-green  { background: rgba(34,197,94,0.2);  color: #4ade80; }
+  .badge-gray   { background: rgba(148,163,184,0.2); color: #94a3b8; }
 
   /* LOADING */
   .loading-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 14px; }
@@ -391,6 +393,10 @@
       <label>ACT ID</label>
       <select id="fACT" onchange="applyFilters()"><option value="">All</option></select>
     </div>
+    <div class="filter-group">
+      <label>Status Bayar</label>
+      <select id="fStatus" onchange="applyFilters()"><option value="">All</option></select>
+    </div>
     <button class="btn-refresh" onclick="resetFilters()">↺ Reset Filter</button>
     <div class="summary-box">
       <div class="s-label">RINGKASAN PERIODE</div>
@@ -448,6 +454,22 @@
           <div class="kpi-label">Average Invoice Value</div>
           <div class="kpi-val orange" id="kpiAvgValue">–</div>
           <div class="kpi-sub">Per Invoice</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#22c55e,#4ade80)">✅</div>
+        <div>
+          <div class="kpi-label">Total Paid</div>
+          <div class="kpi-val" id="kpiPaidValue" style="color:#4ade80">–</div>
+          <div class="kpi-sub" id="kpiPaidSub">–</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:linear-gradient(135deg,#64748b,#94a3b8)">⏳</div>
+        <div>
+          <div class="kpi-label">Total Unpaid</div>
+          <div class="kpi-val" id="kpiUnpaidValue" style="color:#94a3b8">–</div>
+          <div class="kpi-sub" id="kpiUnpaidSub">–</div>
         </div>
       </div>
     </div>
@@ -511,7 +533,7 @@
             <thead>
               <tr>
                 <th>No Invoice</th><th>ACT ID</th><th>No PO</th><th>No BAST</th>
-                <th>Value Invoice</th><th>Periode</th><th>Tahun</th><th>Bulan Tanggal</th><th>Tipe Pekerjaan</th>
+                <th>Value Invoice</th><th>Periode</th><th>Tahun</th><th>Bulan Tanggal</th><th>Tipe Pekerjaan</th><th>Status</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -739,6 +761,7 @@ function generateDummyData() {
       const val     = Math.round(baseVal * (0.5 + Math.random()*2.5) / 1000) * 1000;
       const bastNum = String(Math.floor(Math.random()*999)+1).padStart(3,'0');
       const romawi  = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][mi];
+      const paid    = Math.random() < 0.65 ? 'Paid' : 'Unpaid';
       invoices.push({
         'No Invoice':     `${invNum}-INV-ISM-${String(m.tahun).slice(2)}-${String(mi+1).padStart(2,'0')}`,
         'ACT ID':         act,
@@ -749,6 +772,7 @@ function generateDummyData() {
         'Tahun':          m.tahun,
         'Bulan Tanggal':  m.bulanTgl,
         'Tipe Pekerjaan': tipe,
+        'Paid':           paid,
       });
       invNum++;
     }
@@ -816,12 +840,14 @@ function populateFilters() {
   const tipes = [...new Set(rawData.map(r => r['Tipe Pekerjaan']))].filter(Boolean).sort();
   const poses = [...new Set(rawData.map(r => String(r['No PO']||'')))].filter(Boolean).sort();
   const acts  = [...new Set(rawData.map(r => String(r['ACT ID']||'')))].filter(Boolean).sort();
+  const statuses = [...new Set(rawData.map(r => String(r['Paid']||'').trim()))].filter(Boolean).sort();
 
   fillSelect('fTahun',   tahuns);
   fillSelect('fPeriode', periodes);
   fillSelect('fTipe',    tipes);
   fillSelect('fPO',      poses);
   fillSelect('fACT',     acts);
+  fillSelect('fStatus',  statuses);
 }
 
 function fillSelect(id, vals) {
@@ -838,13 +864,15 @@ function applyFilters() {
   const fTp = document.getElementById('fTipe').value;
   const fPO = document.getElementById('fPO').value;
   const fA  = document.getElementById('fACT').value;
+  const fS  = document.getElementById('fStatus').value;
 
   filteredData = rawData.filter(r =>
     (!fT  || String(r['Tahun'])         === fT)  &&
     (!fP  || String(r['Periode'])       === fP)  &&
     (!fTp || r['Tipe Pekerjaan']        === fTp) &&
     (!fPO || String(r['No PO'])         === fPO) &&
-    (!fA  || String(r['ACT ID'])        === fA)
+    (!fA  || String(r['ACT ID'])        === fA)  &&
+    (!fS  || String(r['Paid']||'').trim() === fS)
   );
 
   const periodeLabel2 = fP
@@ -856,7 +884,7 @@ function applyFilters() {
 }
 
 function resetFilters() {
-  ['fTahun','fPeriode','fTipe','fPO','fACT'].forEach(id => document.getElementById(id).value = '');
+  ['fTahun','fPeriode','fTipe','fPO','fACT','fStatus'].forEach(id => document.getElementById(id).value = '');
   applyFilters();
 }
 
@@ -870,6 +898,11 @@ function renderAll() {
   const totalACT = new Set(data.map(r=>r['ACT ID'])).size;
   const avgVal   = totalInv ? totalVal / totalInv : 0;
 
+  const paidRows   = data.filter(r => String(r['Paid']||'').trim().toLowerCase() === 'paid');
+  const unpaidRows = data.filter(r => String(r['Paid']||'').trim().toLowerCase() === 'unpaid');
+  const paidVal    = paidRows.reduce((s,r) => s + (+r['Value Invoice']||0), 0);
+  const unpaidVal  = unpaidRows.reduce((s,r) => s + (+r['Value Invoice']||0), 0);
+
   // KPI
   document.getElementById('kpiTotalValue').textContent    = formatM(totalVal);
   document.getElementById('kpiTotalValueSub').textContent = `${totalInv} Invoice`;
@@ -877,6 +910,10 @@ function renderAll() {
   document.getElementById('kpiTotalPO').textContent       = totalPO;
   document.getElementById('kpiTotalACT').textContent      = totalACT;
   document.getElementById('kpiAvgValue').textContent      = formatJuta(avgVal);
+  document.getElementById('kpiPaidValue').textContent     = formatM(paidVal);
+  document.getElementById('kpiPaidSub').textContent       = `${paidRows.length} Invoice`;
+  document.getElementById('kpiUnpaidValue').textContent   = formatM(unpaidVal);
+  document.getElementById('kpiUnpaidSub').textContent     = `${unpaidRows.length} Invoice`;
   document.getElementById('sumValue').textContent         = formatM(totalVal);
   document.getElementById('sumCount').textContent         = `${totalInv} Invoice`;
 
@@ -1069,6 +1106,12 @@ function renderTable(data) {
     const cls = t==='Reenginering'?'badge-red': t==='Recbatt'?'badge-orange': t==='CET'?'badge-yellow':'badge-pink';
     return `<span class="badge ${cls}">${t}</span>`;
   };
+  const statusBadge = s => {
+    const norm = String(s||'').trim().toLowerCase();
+    if (norm === 'paid') return `<span class="badge badge-green">Paid</span>`;
+    if (norm === 'unpaid') return `<span class="badge badge-gray">Unpaid</span>`;
+    return `<span class="badge badge-gray">–</span>`;
+  };
   document.getElementById('tableBody').innerHTML = shown.map(r => `
     <tr>
       <td>${r['No Invoice']||'–'}</td>
@@ -1080,6 +1123,7 @@ function renderTable(data) {
       <td>${r['Tahun']||'–'}</td>
       <td>${r['Bulan Tanggal']||'–'}</td>
       <td>${tipeBadge(r['Tipe Pekerjaan']||'–')}</td>
+      <td>${statusBadge(r['Paid'])}</td>
     </tr>
   `).join('');
 }
