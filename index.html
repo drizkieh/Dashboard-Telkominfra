@@ -59,6 +59,7 @@
   .charts-row-1 { grid-template-columns: 1fr 1fr; }
   .charts-row-2 { grid-template-columns: 1fr 1fr 220px; }
   .charts-row-3 { grid-template-columns: 280px 1fr; }
+  .charts-row-3 .chart-card { display: flex; flex-direction: column; min-height: 0; }
   .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
   .chart-title { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
   .chart-wrap { position: relative; width: 100%; }
@@ -94,13 +95,14 @@
   .distrib-pct { font-size: 11px; font-weight: 700; color: var(--orange); min-width: 36px; text-align: right; }
 
   /* MILESTONE PO */
-  .milestone-summary { display: flex; gap: 8px; margin-bottom: 10px; }
-  .milestone-stat { flex: 1; background: var(--bg3); border-radius: 8px; padding: 8px 10px; min-width: 0; }
-  .milestone-stat .ms-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .milestone-stat .ms-val { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .milestone-summary { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; flex-shrink: 0; }
+  .milestone-stat { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--bg3); border-radius: 8px; padding: 7px 10px; }
+  .milestone-stat .ms-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .milestone-stat .ms-val { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
   .milestone-stat.orange .ms-val { color: var(--orange); }
-  .milestone-list { display: flex; flex-direction: column; gap: 8px; }
-  .milestone-item { background: var(--bg3); border-radius: 6px; padding: 8px 10px; }
+  .milestone-list { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 120px; overflow-y: auto; }
+  .milestone-item { background: var(--bg3); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: background 0.15s; }
+  .milestone-item:hover { background: #232323; }
   .milestone-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; margin-bottom: 4px; }
   .milestone-po { color: var(--text); font-weight: 700; }
   .milestone-job { color: var(--muted); font-weight: 400; font-size: 10px; }
@@ -444,6 +446,33 @@
   </div>
 </div>
 
+<!-- PO MILESTONE DETAIL MODAL -->
+<div class="modal-overlay" id="poDetailModal" style="display:none">
+  <div class="modal modal-lg" style="position:relative">
+    <button class="detail-close-btn" onclick="closePOMilestoneDetail()" aria-label="Tutup">✕</button>
+    <h3 id="poDetailModalTitle">📦 Detail Milestone PO</h3>
+
+    <div class="detail-info-grid" id="poDetailInfoGrid"></div>
+
+    <div style="margin-bottom:18px">
+      <div class="milestone-bar-wrap" style="height:10px"><div class="milestone-bar" id="poDetailBar" style="width:0%"></div></div>
+    </div>
+
+    <div class="detail-section-title">Invoice dari PO Ini</div>
+    <div class="detail-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>No Invoice</th><th>ACT ID</th><th>No BAST</th><th>Periode</th><th>Value Invoice</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="poDetailItemsBody"></tbody>
+        <tfoot id="poDetailItemsFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div class="header">
   <div class="header-left">
@@ -623,7 +652,7 @@
       <div class="chart-card">
         <div class="chart-title">Milestone PO</div>
         <div class="milestone-summary" id="milestoneSummary"></div>
-        <div class="milestone-list" id="milestoneList" style="max-height:280px;overflow-y:auto"></div>
+        <div class="milestone-list" id="milestoneList"></div>
       </div>
       <div class="table-card">
         <div class="table-header">
@@ -707,6 +736,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const idx = parseInt(link.dataset.idx, 10);
     const row = currentTableRows[idx];
     if (row) openInvoiceDetail(row);
+  });
+
+  document.getElementById('milestoneList')?.addEventListener('click', e => {
+    const item = e.target.closest('.milestone-item');
+    if (!item || !item.dataset.po) return;
+    openPOMilestoneDetail(item.dataset.po);
   });
 
   const savedId   = localStorage.getItem('inv_sheet_id');
@@ -1427,7 +1462,10 @@ function renderMonthlyList(periodeKeys, periodeMap) {
 // Compares each PO's contract value (from the "PO Master" tab) against how
 // much of it has actually been invoiced (summed from the invoice data),
 // so users can see: total nilai PO, sudah terinvoice, dan belum terinvoice.
+let milestoneSourceData = []; // last invoice dataset used to compute the cards, reused when opening the detail popup
 function renderMilestonePO(data) {
+  milestoneSourceData = data;
+
   // Sum invoiced value per No PO from the (filtered) invoice rows
   const invoicedByPO = {};
   data.forEach(r => {
@@ -1465,7 +1503,7 @@ function renderMilestonePO(data) {
   }).sort((a, b) => b.nilai - a.nilai);
 
   document.getElementById('milestoneList').innerHTML = rows.map(r => `
-    <div class="milestone-item">
+    <div class="milestone-item" data-po="${r.po}" title="Klik untuk lihat detail">
       <div class="milestone-item-top">
         <span class="milestone-po">${r.po} <span class="milestone-job">— ${r.nama}</span></span>
         <span class="milestone-pct">${r.pct.toFixed(0)}%</span>
@@ -1474,6 +1512,68 @@ function renderMilestonePO(data) {
       <div class="milestone-sub">Rp ${Number(r.inv).toLocaleString('id-ID')} / Rp ${Number(r.nilai).toLocaleString('id-ID')}</div>
     </div>
   `).join('');
+}
+
+// ─── PO MILESTONE DETAIL MODAL ────────────────────────────────────────────────
+function openPOMilestoneDetail(po) {
+  const master = poMasterData.find(r => String(r['No PO'] || '').trim() === po);
+  if (!master) return;
+
+  const nilai = +master['Nilai PO'] || 0;
+  const invoices = milestoneSourceData
+    .filter(r => String(r['No PO'] || '').trim() === po)
+    .sort((a, b) => (a['Tahun'] - b['Tahun']) || (periodeIndex(a['Periode']) - periodeIndex(b['Periode'])));
+  const invoiced = Math.min(invoices.reduce((s, r) => s + (+r['Value Invoice'] || 0), 0), nilai || Infinity);
+  const belum = Math.max(nilai - invoiced, 0);
+  const pct = nilai ? (invoiced / nilai * 100) : 0;
+
+  document.getElementById('poDetailModalTitle').textContent = `📦 Detail Milestone PO — ${po}`;
+  document.getElementById('poDetailInfoGrid').innerHTML = `
+    <div class="detail-info-item"><div class="di-label">No PO</div><div class="di-val">${po}</div></div>
+    <div class="detail-info-item"><div class="di-label">Nama Pekerjaan</div><div class="di-val">${master['Nama Pekerjaan']||'–'}</div></div>
+    <div class="detail-info-item"><div class="di-label">Nilai PO</div><div class="di-val">Rp ${Number(nilai).toLocaleString('id-ID')}</div></div>
+    <div class="detail-info-item"><div class="di-label">Sudah Terinvoice</div><div class="di-val" style="color:var(--orange)">Rp ${Number(invoiced).toLocaleString('id-ID')} (${pct.toFixed(1)}%)</div></div>
+    <div class="detail-info-item"><div class="di-label">Belum Terinvoice</div><div class="di-val">Rp ${Number(belum).toLocaleString('id-ID')}</div></div>
+    <div class="detail-info-item"><div class="di-label">Jumlah Invoice</div><div class="di-val">${invoices.length}</div></div>
+  `;
+  document.getElementById('poDetailBar').style.width = `${Math.min(pct,100)}%`;
+
+  const body = document.getElementById('poDetailItemsBody');
+  const foot = document.getElementById('poDetailItemsFoot');
+  const statusBadge = s => {
+    const norm = String(s||'').trim().toLowerCase();
+    if (norm === 'paid') return `<span class="badge badge-green">Paid</span>`;
+    if (norm === 'unpaid') return `<span class="badge badge-gray">Unpaid</span>`;
+    return `<span class="badge badge-gray">–</span>`;
+  };
+
+  if (!invoices.length) {
+    body.innerHTML = `<tr><td colspan="6" class="detail-empty">Belum ada invoice untuk PO ini (sesuai filter yang aktif).</td></tr>`;
+    foot.innerHTML = '';
+  } else {
+    body.innerHTML = invoices.map(inv => `
+      <tr>
+        <td>${inv['No Invoice']||'–'}</td>
+        <td>${inv['ACT ID']||'–'}</td>
+        <td style="font-size:10px;color:var(--muted)">${inv['No BAST']||'–'}</td>
+        <td>${inv['Periode']||'–'} ${inv['Tahun']||''}</td>
+        <td style="color:var(--orange);font-weight:600">${Number(inv['Value Invoice']||0).toLocaleString('id-ID')}</td>
+        <td>${statusBadge(inv['Paid'])}</td>
+      </tr>
+    `).join('');
+    foot.innerHTML = `
+      <tr>
+        <td colspan="4">TOTAL</td>
+        <td>${invoices.reduce((s,r)=>s+(+r['Value Invoice']||0),0).toLocaleString('id-ID')}</td>
+        <td>–</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById('poDetailModal').style.display = 'flex';
+}
+function closePOMilestoneDetail() {
+  document.getElementById('poDetailModal').style.display = 'none';
 }
 
 // ─── TABLE ────────────────────────────────────────────────────────────────────
