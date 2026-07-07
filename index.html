@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Invoice Management – ISM - TIS - Telkominfra </title>
+<title>Dashboard Invoice Management – Integra Solusi Mandiri</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
@@ -111,6 +111,7 @@
   .milestone-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--red), var(--orange)); }
   .milestone-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
   .milestone-empty { font-size: 11px; color: var(--muted); padding: 10px 2px; line-height: 1.5; }
+  .milestone-filter-note { display: flex; align-items: flex-start; gap: 6px; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.35); color: var(--orange); font-size: 10px; line-height: 1.45; padding: 7px 9px; border-radius: 6px; }
 
   /* TABLE */
   .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; overflow: hidden; }
@@ -1463,6 +1464,23 @@ function renderMonthlyList(periodeKeys, periodeMap) {
 // much of it has actually been invoiced (summed from the invoice data),
 // so users can see: total nilai PO, sudah terinvoice, dan belum terinvoice.
 let milestoneSourceData = []; // last invoice dataset used to compute the cards, reused when opening the detail popup
+
+// Reads the sidebar filter selects directly, so callers don't need to thread
+// filter state through renderAll(). Returns e.g. [{label:'Periode', val:'December'}].
+function getActiveFilterInfo() {
+  const specs = [
+    { id: 'fTahun',   label: 'Tahun' },
+    { id: 'fPeriode', label: 'Periode' },
+    { id: 'fTipe',    label: 'Tipe Pekerjaan' },
+    { id: 'fPO',      label: 'No PO' },
+    { id: 'fACT',     label: 'ACT ID' },
+    { id: 'fStatus',  label: 'Status Bayar' },
+  ];
+  return specs
+    .map(s => ({ label: s.label, val: document.getElementById(s.id)?.value || '' }))
+    .filter(s => s.val);
+}
+
 function renderMilestonePO(data) {
   milestoneSourceData = data;
 
@@ -1474,27 +1492,44 @@ function renderMilestonePO(data) {
     invoicedByPO[po] = (invoicedByPO[po] || 0) + (+r['Value Invoice'] || 0);
   });
 
-  const totalPOValue = poMasterData.reduce((s, r) => s + (+r['Nilai PO'] || 0), 0);
-  const totalInvoiced = poMasterData.reduce((s, r) => {
+  const activeFilters = getActiveFilterInfo();
+  const isFiltered = activeFilters.length > 0;
+
+  // When a filter is active, only consider POs that actually have an invoice matching
+  // the current filter. Otherwise every other PO in the master list would show up as
+  // "0% / belum terinvoice", which looks like their real lifetime progress but is
+  // really just "no invoice in this filtered slice" — a easy-to-misread false signal.
+  const relevantMaster = isFiltered
+    ? poMasterData.filter(r => invoicedByPO[String(r['No PO'] || '').trim()])
+    : poMasterData;
+
+  const totalPOValue = relevantMaster.reduce((s, r) => s + (+r['Nilai PO'] || 0), 0);
+  const totalInvoiced = relevantMaster.reduce((s, r) => {
     const po = String(r['No PO'] || '').trim();
     const nilai = +r['Nilai PO'] || 0;
     return s + Math.min(invoicedByPO[po] || 0, nilai);
   }, 0);
   const totalBelum = Math.max(totalPOValue - totalInvoiced, 0);
 
+  const filterNote = isFiltered
+    ? `<div class="milestone-filter-note">⚠️ <span><strong>Filter aktif</strong> (${activeFilters.map(f => `${f.label}: ${f.val}`).join(', ')}) — hanya menampilkan PO yang punya invoice sesuai filter ini. Angka di bawah <u>bukan</u> total keseluruhan PO, hanya untuk PO yang relevan dengan filter.</span></div>`
+    : '';
+
   document.getElementById('milestoneSummary').innerHTML = `
-    <div class="milestone-stat"><div class="ms-label">Total Nilai PO</div><div class="ms-val">${formatM(totalPOValue)}</div></div>
+    ${filterNote}
+    <div class="milestone-stat"><div class="ms-label">Total Nilai PO${isFiltered ? ' (Relevan)' : ''}</div><div class="ms-val">${formatM(totalPOValue)}</div></div>
     <div class="milestone-stat orange"><div class="ms-label">Sudah Terinvoice</div><div class="ms-val">${formatM(totalInvoiced)}</div></div>
     <div class="milestone-stat"><div class="ms-label">Belum Terinvoice</div><div class="ms-val">${formatM(totalBelum)}</div></div>
   `;
 
-  if (!poMasterData.length) {
-    document.getElementById('milestoneList').innerHTML =
-      `<div class="milestone-empty">Belum ada data PO Master. Tambahkan tab <strong>"PO Master"</strong> di sheet dengan kolom: No PO, Nilai PO, Nama Pekerjaan.</div>`;
+  if (!relevantMaster.length) {
+    document.getElementById('milestoneList').innerHTML = isFiltered
+      ? `<div class="milestone-empty">Tidak ada PO dengan invoice yang cocok dengan filter ini.</div>`
+      : `<div class="milestone-empty">Belum ada data PO Master. Tambahkan tab <strong>"PO Master"</strong> di sheet dengan kolom: No PO, Nilai PO, Nama Pekerjaan.</div>`;
     return;
   }
 
-  const rows = poMasterData.map(r => {
+  const rows = relevantMaster.map(r => {
     const po    = String(r['No PO'] || '').trim();
     const nilai = +r['Nilai PO'] || 0;
     const inv   = Math.min(invoicedByPO[po] || 0, nilai);
