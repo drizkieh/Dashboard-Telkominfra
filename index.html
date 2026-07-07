@@ -93,6 +93,23 @@
   .distrib-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--red), var(--orange)); }
   .distrib-pct { font-size: 11px; font-weight: 700; color: var(--orange); min-width: 36px; text-align: right; }
 
+  /* MILESTONE PO */
+  .milestone-summary { display: flex; gap: 8px; margin-bottom: 10px; }
+  .milestone-stat { flex: 1; background: var(--bg3); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .milestone-stat .ms-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .milestone-stat .ms-val { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .milestone-stat.orange .ms-val { color: var(--orange); }
+  .milestone-list { display: flex; flex-direction: column; gap: 8px; }
+  .milestone-item { background: var(--bg3); border-radius: 6px; padding: 8px 10px; }
+  .milestone-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; margin-bottom: 4px; }
+  .milestone-po { color: var(--text); font-weight: 700; }
+  .milestone-job { color: var(--muted); font-weight: 400; font-size: 10px; }
+  .milestone-pct { color: var(--orange); font-weight: 700; flex-shrink: 0; }
+  .milestone-bar-wrap { background: #222; border-radius: 3px; height: 8px; overflow: hidden; }
+  .milestone-bar { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--red), var(--orange)); }
+  .milestone-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
+  .milestone-empty { font-size: 11px; color: var(--muted); padding: 10px 2px; line-height: 1.5; }
+
   /* TABLE */
   .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; overflow: hidden; }
   .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -344,6 +361,11 @@
       <input type="text" id="defaultSheetName" placeholder="Sheet1" value="Sheet1">
       <label class="modal-label">Nama Tab Detail Item (untuk detail invoice)</label>
       <input type="text" id="defaultDetailSheetName" placeholder="Detail" value="Detail">
+      <label class="modal-label">Nama Tab PO Master (untuk Milestone PO)</label>
+      <input type="text" id="defaultPOMasterSheetName" placeholder="PO Master" value="PO Master">
+      <div class="config-hint" style="margin-top:4px">
+        Tab PO Master butuh kolom: <strong>No PO, Nilai PO, Nama Pekerjaan</strong>.
+      </div>
       <div class="error-msg" id="defaultError"></div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="hideConfig()">Batal</button>
@@ -366,6 +388,11 @@
       <input type="text" id="detailSheetNameInput" placeholder="Detail" value="Detail">
       <div class="config-hint" style="margin-top:4px;margin-bottom:10px">
         Tab detail butuh kolom: No Invoice, PO Item, Nama Pekerjaan, Price Per Unit, Qty, Unit, Total Price, Total Billed, Delivery Progress (%), GR Amount, GR Progress (%), Balance, ACT ID, Site ID.
+      </div>
+      <label class="modal-label">Nama Tab PO Master (untuk Milestone PO)</label>
+      <input type="text" id="poMasterSheetNameInput" placeholder="PO Master" value="PO Master">
+      <div class="config-hint" style="margin-top:4px;margin-bottom:10px">
+        Tab PO Master butuh kolom: No PO, Nilai PO, Nama Pekerjaan.
       </div>
       <div class="error-msg" id="configError"></div>
       <div class="modal-footer">
@@ -594,8 +621,9 @@
     <!-- ROW 3: Distribusi + Table -->
     <div class="charts-row charts-row-3">
       <div class="chart-card">
-        <div class="chart-title">Distribusi Invoice Value</div>
-        <div id="distribList" style="margin-top:4px"></div>
+        <div class="chart-title">Milestone PO</div>
+        <div class="milestone-summary" id="milestoneSummary"></div>
+        <div class="milestone-list" id="milestoneList" style="max-height:280px;overflow-y:auto"></div>
       </div>
       <div class="table-card">
         <div class="table-header">
@@ -640,6 +668,7 @@
 const DEFAULT_SHEET_ID   = '1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q';
 const DEFAULT_SHEET_NAME = 'Sheet1';
 const DEFAULT_DETAIL_SHEET_NAME = 'Detail';
+const DEFAULT_PO_MASTER_SHEET_NAME = 'PO Master';
 
 // Urutan bulan Indonesia untuk sorting kolom Periode
 const PERIODE_ORDER = [
@@ -664,6 +693,7 @@ function tipeColor(t) { return TIPE_COLORS[t] || '#888'; }
 let rawData      = [];
 let filteredData = [];
 let detailData   = [];
+let poMasterData = [];
 let currentTableRows = [];
 let showAll      = false;
 let charts       = {};
@@ -682,17 +712,18 @@ window.addEventListener('DOMContentLoaded', () => {
   const savedId   = localStorage.getItem('inv_sheet_id');
   const savedName = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
   const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
+  const savedPOMasterName = localStorage.getItem('inv_po_master_sheet_name') || DEFAULT_PO_MASTER_SHEET_NAME;
   const savedSrc  = localStorage.getItem('inv_source') || 'default';
 
   if (savedSrc === 'demo') {
     loadDemo();
   } else if (savedSrc === 'custom' && savedId) {
     setSourceIndicator('Custom Sheet');
-    fetchSheetData(savedId, savedName, savedDetailName);
+    fetchSheetData(savedId, savedName, savedDetailName, savedPOMasterName);
   } else {
     // default
     setSourceIndicator('Sheet Default');
-    fetchSheetData(DEFAULT_SHEET_ID, savedName, savedDetailName);
+    fetchSheetData(DEFAULT_SHEET_ID, savedName, savedDetailName, savedPOMasterName);
   }
 });
 
@@ -807,6 +838,9 @@ function openConfig() {
   const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
   document.getElementById('defaultDetailSheetName').value = savedDetailName;
   document.getElementById('detailSheetNameInput').value   = savedDetailName;
+  const savedPOMasterName = localStorage.getItem('inv_po_master_sheet_name') || DEFAULT_PO_MASTER_SHEET_NAME;
+  document.getElementById('defaultPOMasterSheetName').value = savedPOMasterName;
+  document.getElementById('poMasterSheetNameInput').value    = savedPOMasterName;
   if (src === 'custom') {
     document.getElementById('sheetIdInput').value   = localStorage.getItem('inv_sheet_id') || '';
     document.getElementById('sheetNameInput').value = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
@@ -820,29 +854,33 @@ function hideConfig() {
 function connectDefault() {
   const name = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
   const detailName = document.getElementById('defaultDetailSheetName').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
+  const poMasterName = document.getElementById('defaultPOMasterSheetName').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
   localStorage.setItem('inv_source',     'default');
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
+  localStorage.setItem('inv_po_master_sheet_name', poMasterName);
   localStorage.removeItem('inv_sheet_id');
   hideConfig();
   setSourceIndicator('Sheet Default');
   showLoading('Menghubungkan ke Sheet Default…');
-  fetchSheetData(DEFAULT_SHEET_ID, name, detailName);
+  fetchSheetData(DEFAULT_SHEET_ID, name, detailName, poMasterName);
 }
 
 function connectCustom() {
   const id   = document.getElementById('sheetIdInput').value.trim();
   const name = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
   const detailName = document.getElementById('detailSheetNameInput').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
+  const poMasterName = document.getElementById('poMasterSheetNameInput').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
   if (!id) { showErr('configError', 'Sheet ID tidak boleh kosong.'); return; }
   localStorage.setItem('inv_source',     'custom');
   localStorage.setItem('inv_sheet_id',   id);
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
+  localStorage.setItem('inv_po_master_sheet_name', poMasterName);
   hideConfig();
   setSourceIndicator('Custom Sheet');
   showLoading('Mengambil data dari Google Sheets…');
-  fetchSheetData(id, name, detailName);
+  fetchSheetData(id, name, detailName, poMasterName);
 }
 
 function useDummyData() {
@@ -857,6 +895,7 @@ function loadDemo() {
   setTimeout(() => {
     rawData = generateDummyData();
     detailData = generateDummyDetailData(rawData);
+    poMasterData = generateDummyPOMasterData();
     onDataReady();
   }, 600);
 }
@@ -870,7 +909,7 @@ function setSourceIndicator(label) {
 }
 
 // ─── FETCH SHEET ──────────────────────────────────────────────────────────────
-function fetchSheetData(sheetId, sheetName, detailSheetName) {
+function fetchSheetData(sheetId, sheetName, detailSheetName, poMasterSheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
   fetch(url)
     .then(r => r.text())
@@ -884,8 +923,9 @@ function fetchSheetData(sheetId, sheetName, detailSheetName) {
         showConfig_withError('Gagal parsing data. Cek apakah sheet sudah dibagikan (Anyone with link – Viewer).');
         return;
       }
-      // Detail sheet is best-effort: fetch it separately so its failure never blocks the main dashboard
+      // Detail & PO Master tabs are best-effort: fetched separately so their failure never blocks the main dashboard
       fetchDetailSheetData(sheetId, detailSheetName || DEFAULT_DETAIL_SHEET_NAME);
+      fetchPOMasterData(sheetId, poMasterSheetName || DEFAULT_PO_MASTER_SHEET_NAME);
     })
     .catch(() => {
       hideLoading();
@@ -908,6 +948,26 @@ function fetchDetailSheetData(sheetId, detailSheetName) {
       }
     })
     .catch(() => { detailData = []; });
+}
+
+// Best-effort fetch of the "PO Master" tab (No PO, Nilai PO, Nama Pekerjaan).
+// Used to power the Milestone PO card (nilai PO vs sudah/belum terinvoice).
+// Re-renders just the Milestone PO card once loaded, since it arrives after
+// the main dashboard has already rendered.
+function fetchPOMasterData(sheetId, poMasterSheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(poMasterSheetName)}`;
+  fetch(url)
+    .then(r => r.text())
+    .then(text => {
+      try {
+        const json = JSON.parse(text.substring(47, text.length - 2));
+        poMasterData = parseGvizPOMasterData(json);
+      } catch(e) {
+        poMasterData = [];
+      }
+      renderMilestonePO(filteredData);
+    })
+    .catch(() => { poMasterData = []; renderMilestonePO(filteredData); });
 }
 function showConfig_withError(msg) {
   openConfig();
@@ -942,6 +1002,21 @@ function parseGvizDetailData(json) {
       return obj;
     })
     .filter(r => r['No Invoice']);
+}
+
+// Parses the "PO Master" tab (No PO, Nilai PO, Nama Pekerjaan) used for Milestone PO.
+function parseGvizPOMasterData(json) {
+  const cols = json.table.cols.map(c => c.label);
+  return json.table.rows
+    .map(row => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = row.c[i];
+        obj[col] = cell ? (cell.v !== null && cell.v !== undefined ? cell.v : '') : '';
+      });
+      return obj;
+    })
+    .filter(r => r['No PO']);
 }
 
 // ─── DUMMY DATA ───────────────────────────────────────────────────────────────
@@ -989,6 +1064,25 @@ function generateDummyData() {
     }
   });
   return invoices;
+}
+
+// Generates synthetic PO Master rows (No PO, Nilai PO, Nama Pekerjaan) matching
+// the same `pos` list used in generateDummyData, so the Milestone PO demo
+// preview looks realistic without a real "PO Master" sheet tab.
+function generateDummyPOMasterData() {
+  const poList = [
+    { po:'4110006476', nama:'Reengineering Site Jabodetabek',    nilai: 950e6  },
+    { po:'4110006233', nama:'Recbatt Regional Jawa Barat',       nilai: 620e6  },
+    { po:'4110006956', nama:'CET Site Migration',                nilai: 1450e6 },
+    { po:'4110006744', nama:'Validasi Inaktif Radio Nasional',   nilai: 780e6  },
+    { po:'4110006527', nama:'Reengineering Site Jawa Tengah',    nilai: 890e6  },
+    { po:'4110006599', nama:'Recbatt Regional Sumatera',         nilai: 540e6  },
+    { po:'4110006798', nama:'CET Optimasi Jaringan',             nilai: 1100e6 },
+    { po:'4110007034', nama:'Reengineering Site Jawa Timur',     nilai: 1020e6 },
+    { po:'4110006687', nama:'Validasi Inaktif Radio Regional',   nilai: 460e6  },
+    { po:'4110006769', nama:'Recbatt Regional Kalimantan',       nilai: 610e6  },
+  ];
+  return poList.map(p => ({ 'No PO': p.po, 'Nilai PO': p.nilai, 'Nama Pekerjaan': p.nama }));
 }
 
 // Generates synthetic line-item detail rows for each demo invoice, so the
@@ -1201,14 +1295,8 @@ function renderAll() {
   // Monthly list
   renderMonthlyList(periodeKeys, periodeMap);
 
-  // Distribusi
-  renderDistrib(data, [
-    {label:'0 – 50 Juta',     min:0,     max:50e6},
-    {label:'50 – 100 Juta',   min:50e6,  max:100e6},
-    {label:'100 – 200 Juta',  min:100e6, max:200e6},
-    {label:'200 – 500 Juta',  min:200e6, max:500e6},
-    {label:'> 500 Juta',      min:500e6, max:Infinity},
-  ]);
+  // Milestone PO
+  renderMilestonePO(data);
 
   // Table
   renderTable(data);
@@ -1335,18 +1423,57 @@ function renderMonthlyList(periodeKeys, periodeMap) {
   `).join('');
 }
 
-// ─── DISTRIBUSI ───────────────────────────────────────────────────────────────
-function renderDistrib(data, buckets) {
-  const counts = buckets.map(b => data.filter(r => { const v=+r['Value Invoice']||0; return v>=b.min&&v<b.max; }).length);
-  const total  = counts.reduce((a,b)=>a+b,0)||1;
-  document.getElementById('distribList').innerHTML = buckets.map((b,i) => {
-    const pct = ((counts[i]/total)*100).toFixed(1);
-    return `<div class="distrib-row">
-      <span class="distrib-label">${b.label}</span>
-      <div class="distrib-bar-wrap"><div class="distrib-bar" style="width:${pct}%"></div></div>
-      <span class="distrib-pct">${pct}%</span>
-    </div>`;
-  }).join('');
+// ─── MILESTONE PO ─────────────────────────────────────────────────────────────
+// Compares each PO's contract value (from the "PO Master" tab) against how
+// much of it has actually been invoiced (summed from the invoice data),
+// so users can see: total nilai PO, sudah terinvoice, dan belum terinvoice.
+function renderMilestonePO(data) {
+  // Sum invoiced value per No PO from the (filtered) invoice rows
+  const invoicedByPO = {};
+  data.forEach(r => {
+    const po = String(r['No PO'] || '').trim();
+    if (!po) return;
+    invoicedByPO[po] = (invoicedByPO[po] || 0) + (+r['Value Invoice'] || 0);
+  });
+
+  const totalPOValue = poMasterData.reduce((s, r) => s + (+r['Nilai PO'] || 0), 0);
+  const totalInvoiced = poMasterData.reduce((s, r) => {
+    const po = String(r['No PO'] || '').trim();
+    const nilai = +r['Nilai PO'] || 0;
+    return s + Math.min(invoicedByPO[po] || 0, nilai);
+  }, 0);
+  const totalBelum = Math.max(totalPOValue - totalInvoiced, 0);
+
+  document.getElementById('milestoneSummary').innerHTML = `
+    <div class="milestone-stat"><div class="ms-label">Total Nilai PO</div><div class="ms-val">${formatM(totalPOValue)}</div></div>
+    <div class="milestone-stat orange"><div class="ms-label">Sudah Terinvoice</div><div class="ms-val">${formatM(totalInvoiced)}</div></div>
+    <div class="milestone-stat"><div class="ms-label">Belum Terinvoice</div><div class="ms-val">${formatM(totalBelum)}</div></div>
+  `;
+
+  if (!poMasterData.length) {
+    document.getElementById('milestoneList').innerHTML =
+      `<div class="milestone-empty">Belum ada data PO Master. Tambahkan tab <strong>"PO Master"</strong> di sheet dengan kolom: No PO, Nilai PO, Nama Pekerjaan.</div>`;
+    return;
+  }
+
+  const rows = poMasterData.map(r => {
+    const po    = String(r['No PO'] || '').trim();
+    const nilai = +r['Nilai PO'] || 0;
+    const inv   = Math.min(invoicedByPO[po] || 0, nilai);
+    const pct   = nilai ? (inv / nilai * 100) : 0;
+    return { po, nama: r['Nama Pekerjaan'] || '–', nilai, inv, pct };
+  }).sort((a, b) => b.nilai - a.nilai);
+
+  document.getElementById('milestoneList').innerHTML = rows.map(r => `
+    <div class="milestone-item">
+      <div class="milestone-item-top">
+        <span class="milestone-po">${r.po} <span class="milestone-job">— ${r.nama}</span></span>
+        <span class="milestone-pct">${r.pct.toFixed(0)}%</span>
+      </div>
+      <div class="milestone-bar-wrap"><div class="milestone-bar" style="width:${Math.min(r.pct,100)}%"></div></div>
+      <div class="milestone-sub">Rp ${Number(r.inv).toLocaleString('id-ID')} / Rp ${Number(r.nilai).toLocaleString('id-ID')}</div>
+    </div>
+  `).join('');
 }
 
 // ─── TABLE ────────────────────────────────────────────────────────────────────
