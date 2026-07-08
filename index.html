@@ -913,9 +913,19 @@ function closePdfPwd() {
   document.getElementById('pdfPwdError').textContent = '';
 }
 
+// For Google Drive links, force a direct-download URL instead of the
+// share/view link (which just opens Drive's preview page in a new tab).
+function getPdfDownloadUrl(url) {
+  const driveId = extractDriveFileId(url);
+  if (driveId) {
+    return `https://drive.google.com/uc?export=download&id=${driveId}`;
+  }
+  return url;
+}
+
 function openDownloadDirect(url) {
   const a = document.createElement('a');
-  a.href = url;
+  a.href = getPdfDownloadUrl(url);
   a.target = '_blank';
   a.rel = 'noopener';
   document.body.appendChild(a);
@@ -923,14 +933,41 @@ function openDownloadDirect(url) {
   document.body.removeChild(a);
 }
 
+// Extract a Google Drive file ID from common share-link formats.
+// Handles:
+//   https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+//   https://drive.google.com/open?id=FILE_ID
+//   https://drive.google.com/uc?id=FILE_ID&export=download
+// Returns null if the URL doesn't look like a Google Drive link.
+function extractDriveFileId(url) {
+  if (!url) return null;
+  let m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  return null;
+}
+
+// Build the best embeddable preview URL for a given PDF link.
+// Google Drive links use Drive's own /preview endpoint (far more reliable
+// than the old Google Docs gview embed, which frequently fails to load
+// external/Drive links and just shows a blank "no preview" state).
+// Non-Drive links fall back to the Google Docs viewer as before.
+function getPdfEmbedUrl(url) {
+  const driveId = extractDriveFileId(url);
+  if (driveId) {
+    return `https://drive.google.com/file/d/${driveId}/preview`;
+  }
+  return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+}
+
 function openPdfViewer(url, title) {
   document.getElementById('pdfViewerTitle').textContent = `📄 ${title}`;
-  document.getElementById('pdfViewerDownload').href = url;
+  document.getElementById('pdfViewerDownload').href = getPdfDownloadUrl(url);
 
   // Try iframe embed; some PDF hosts block iframe
   const body = document.getElementById('pdfViewerBody');
-  // Use Google Docs viewer as fallback for cross-origin PDFs
-  const embedUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+  const embedUrl = getPdfEmbedUrl(url);
   body.innerHTML = `<iframe src="${embedUrl}" class="pdf-iframe-wrap" allowfullscreen></iframe>`;
 
   document.getElementById('pdfViewerOverlay').style.display = 'flex';
