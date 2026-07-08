@@ -53,6 +53,8 @@
   .kpi-val   { font-size: 20px; font-weight: 700; color: white; line-height: 1.1; }
   .kpi-val.orange { color: var(--orange); }
   .kpi-sub   { font-size: 10px; color: var(--muted); }
+  /* special: smaller font for nilai PO KPI so long numbers don't overflow */
+  .kpi-val.nilai-po { font-size: 15px; }
 
   /* CHARTS */
   .charts-row { display: grid; gap: 12px; }
@@ -85,6 +87,8 @@
   .monthly-info { flex: 1; }
   .monthly-month { font-size: 10px; color: var(--muted); }
   .monthly-amt   { font-size: 12px; font-weight: 700; color: white; }
+  /* unit badge next to amount */
+  .monthly-unit  { font-size: 9px; font-weight: 600; color: var(--orange); background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25); border-radius: 3px; padding: 1px 5px; margin-left: 4px; vertical-align: middle; }
 
   /* DISTRIB */
   .distrib-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #222; }
@@ -101,8 +105,8 @@
   .milestone-stat .ms-val { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
   .milestone-stat.orange .ms-val { color: var(--orange); }
   .milestone-list { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 120px; overflow-y: auto; }
-  .milestone-item { background: var(--bg3); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: background 0.15s; }
-  .milestone-item:hover { background: #232323; }
+  .milestone-item { background: var(--bg3); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: background 0.15s; border: 1px solid transparent; }
+  .milestone-item:hover { background: #232323; border-color: rgba(249,115,22,0.2); }
   .milestone-item-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; margin-bottom: 4px; }
   .milestone-po { color: var(--text); font-weight: 700; }
   .milestone-job { color: var(--muted); font-weight: 400; font-size: 10px; }
@@ -112,6 +116,7 @@
   .milestone-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
   .milestone-empty { font-size: 11px; color: var(--muted); padding: 10px 2px; line-height: 1.5; }
   .milestone-filter-note { display: flex; align-items: flex-start; gap: 6px; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.35); color: var(--orange); font-size: 10px; line-height: 1.45; padding: 7px 9px; border-radius: 6px; }
+  .milestone-click-hint { font-size: 9px; color: #555; text-align: center; margin-top: 4px; letter-spacing: 0.3px; }
 
   /* TABLE */
   .table-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; overflow: hidden; }
@@ -147,7 +152,7 @@
   }
   .detail-info-item .di-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
   .detail-info-item .di-val { font-size: 13px; font-weight: 600; color: var(--text); }
-  .detail-pdf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .detail-pdf-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
   .btn-pdf {
     display: inline-flex; align-items: center; gap: 6px;
     background: linear-gradient(135deg, var(--red), var(--orange)); color: white;
@@ -162,6 +167,55 @@
   .detail-table-wrap td { padding: 8px 10px; border-top: 1px solid var(--border); white-space: nowrap; }
   .detail-table-wrap tfoot td { font-weight: 700; color: white; border-top: 2px solid var(--border); background: rgba(255,255,255,0.02); }
   .detail-empty { padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+
+  /* ── PDF PASSWORD MODAL ────────────────────────────────────── */
+  .pdf-pwd-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .pdf-pwd-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 28px 22px; width: 380px; max-width: 92vw;
+  }
+  .pdf-pwd-box h4 { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
+  .pdf-pwd-box p  { font-size: 11px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; }
+  .pdf-pwd-box .lock-icon { font-size: 32px; text-align: center; margin-bottom: 12px; }
+  .pwd-input-wrap { position: relative; margin-bottom: 8px; }
+  .pwd-input-wrap input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: 10px 40px 10px 14px;
+    font-size: 14px; letter-spacing: 2px;
+  }
+  .pwd-input-wrap input:focus { outline: none; border-color: var(--orange); }
+  .pwd-toggle {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px;
+    padding: 0;
+  }
+  .pwd-error { font-size: 11px; color: #f87171; min-height: 16px; margin-bottom: 12px; }
+  .pwd-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .pdf-iframe-wrap { width: 100%; height: 70vh; border: none; border-radius: 8px; background: #111; }
+
+  /* PDF Viewer modal */
+  .pdf-viewer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    display: flex; align-items: stretch; justify-content: center; z-index: 9990;
+    flex-direction: column;
+  }
+  .pdf-viewer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .pdf-viewer-header h4 { font-size: 14px; font-weight: 700; color: white; }
+  .pdf-viewer-actions { display: flex; gap: 8px; align-items: center; }
+  .pdf-viewer-body { flex: 1; padding: 0; overflow: hidden; }
+  .pdf-viewer-body iframe { width: 100%; height: 100%; border: none; }
+  .pdf-viewer-body .pdf-no-embed {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 16px; color: var(--muted);
+  }
+  .pdf-viewer-body .pdf-no-embed .pne-icon { font-size: 48px; }
+  .pdf-viewer-body .pdf-no-embed p { font-size: 13px; text-align: center; max-width: 320px; line-height: 1.6; }
 
   /* LOADING */
   .loading-overlay { position: fixed; inset: 0; background: rgba(13,13,13,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999; flex-direction: column; gap: 14px; }
@@ -203,17 +257,19 @@
   .source-indicator { font-size: 10px; color: var(--muted); }
   .source-indicator span { color: var(--orange); font-weight: 600; }
 
+  /* Password setting row in config modal */
+  .pwd-config-block { background: var(--bg3); border: 1px solid #2a1510; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+  .pwd-config-block .pcb-label { font-size: 10px; color: var(--orange); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .pwd-config-block .pcb-hint { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
   /* ═══════════════════════════════════════════════════════════════════════
-     MOBILE FILTER DRAWER + BOTTOM NAV (hidden on desktop by default)
+     MOBILE FILTER DRAWER + BOTTOM NAV
   ═══════════════════════════════════════════════════════════════════════ */
   .drawer-overlay { display: none; }
   .drawer-close-btn { display: none; }
   .bottom-nav { display: none; }
   .mobile-only { display: none; }
 
-  /* ═══════════════════════════════════════════════════════════════════════
-     TABLET (≤ 1024px) — 5-col KPI → 3-col, trim side-column charts
-  ═══════════════════════════════════════════════════════════════════════ */
   @media (max-width: 1024px) {
     .kpi-row { grid-template-columns: repeat(3, 1fr); }
     .charts-row-2 { grid-template-columns: 1fr 1fr; }
@@ -222,13 +278,8 @@
     .sidebar { width: 168px; min-width: 168px; }
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════
-     MOBILE (≤ 768px) — stacked layout, drawer filter, bottom nav
-  ═══════════════════════════════════════════════════════════════════════ */
   @media (max-width: 768px) {
-    body { font-size: 13px; padding-bottom: 62px; } /* room for bottom nav */
-
-    /* HEADER */
+    body { font-size: 13px; padding-bottom: 62px; }
     .header { padding: 12px 14px; }
     .logo { width: 36px; height: 36px; font-size: 16px; border-radius: 8px; }
     .header-title h1 { font-size: 14px; letter-spacing: 0.5px; }
@@ -236,12 +287,9 @@
     .header-title p  { font-size: 9px; }
     .header-right .label { font-size: 9px; }
     .header-right .date  { font-size: 11px; }
-    .header-right button.btn-primary { display: none; } /* moved into bottom nav */
+    .header-right button.btn-primary { display: none; }
     .source-indicator { font-size: 9px; }
-
-    /* MAIN LAYOUT — sidebar becomes off-canvas drawer */
     .main { display: block; min-height: auto; }
-
     .sidebar {
       position: fixed; top: 0; left: 0; height: 100dvh; width: 84vw; max-width: 300px;
       z-index: 9200; transform: translateX(-100%); transition: transform 0.28s ease;
@@ -255,17 +303,12 @@
       color: var(--muted); font-size: 15px; cursor: pointer;
     }
     .filter-title { padding-right: 30px; }
-
     .drawer-overlay {
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       z-index: 9100;
     }
     .drawer-overlay.open { display: block; }
-
-    /* CONTENT */
     .content { padding: 12px; gap: 12px; }
-
-    /* KPI — horizontal snap-scroll row of cards instead of a cramped grid */
     .kpi-row {
       display: flex; grid-template-columns: none; gap: 8px;
       overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 2px;
@@ -275,31 +318,22 @@
     .kpi-card { min-width: 158px; scroll-snap-align: start; flex-shrink: 0; padding: 10px 12px; }
     .kpi-val { font-size: 17px; }
     .kpi-icon { width: 30px; height: 30px; font-size: 14px; }
-
-    /* CHARTS — everything stacks to one column */
     .charts-row-1, .charts-row-2, .charts-row-3 { grid-template-columns: 1fr; }
     .charts-row-2 .chart-card:nth-child(3) { grid-column: auto; }
     .chart-card { padding: 12px; }
     .chart-wrap { height: 220px !important; }
     #barPOWrap { height: auto !important; min-height: 200px; }
-
     .donut-area { flex-direction: column; align-items: stretch; gap: 12px; }
     .donut-wrap { width: 150px; height: 150px; margin: 0 auto; }
     .donut-legend { width: 100%; }
-
-    /* TABLE — allow horizontal scroll, keep font readable */
     .table-card { padding: 12px; }
     .table-wrap { -webkit-overflow-scrolling: touch; }
     th, td { padding: 8px; font-size: 10.5px; white-space: nowrap; }
-
-    /* MODAL */
     .modal { width: 92vw; padding: 18px; }
     .modal-lg { max-height: 84vh; }
     .detail-info-grid { grid-template-columns: repeat(2, 1fr); }
     .detail-table-wrap table { font-size: 10px; }
     .detail-table-wrap th, .detail-table-wrap td { padding: 6px 8px; }
-
-    /* BOTTOM NAV */
     .bottom-nav {
       display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
       background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
@@ -309,8 +343,7 @@
     .bottom-nav-btn {
       display: flex; flex-direction: column; align-items: center; gap: 2px;
       background: none; border: none; color: var(--muted); font-size: 9px;
-      font-weight: 600; letter-spacing: 0.3px; cursor: pointer; padding: 4px 10px;
-      flex: 1;
+      font-weight: 600; letter-spacing: 0.3px; cursor: pointer; padding: 4px 10px; flex: 1;
     }
     .bottom-nav-btn .bn-icon { font-size: 17px; line-height: 1; }
     .bottom-nav-btn.primary { color: var(--orange); }
@@ -318,11 +351,10 @@
       width: 30px; height: 30px; display:flex; align-items:center; justify-content:center;
       background: linear-gradient(135deg, var(--red), var(--orange)); border-radius: 50%; color: white; font-size: 14px;
     }
-
     .mobile-only { display: block; }
+    .pdf-viewer-body iframe { height: 60vh; }
   }
 
-  /* Small phones */
   @media (max-width: 380px) {
     .kpi-card { min-width: 140px; }
     .header-title p { display: none; }
@@ -339,10 +371,9 @@
 
 <!-- CONFIG MODAL -->
 <div class="modal-overlay" id="configModal" style="display:none">
-  <div class="modal">
+  <div class="modal" style="max-height:90vh;overflow-y:auto">
     <h3>⚙️ Sumber Data</h3>
 
-    <!-- TABS -->
     <div class="source-tabs">
       <button class="source-tab active" id="tabDefault" onclick="switchTab('default')">📊 Sheet Default</button>
       <button class="source-tab" id="tabCustom" onclick="switchTab('custom')">🔗 Sheet Lain</button>
@@ -358,17 +389,23 @@
         <div class="connected-badge">✓ Siap digunakan</div>
       </div>
       <div class="config-hint" style="margin-top:8px">
-        Untuk fitur detail invoice: tambahkan kolom <strong>Link PDF</strong> di sheet utama, dan buat tab terpisah bernama sesuai di bawah dengan kolom <strong>No Invoice, PO Item, Nama Pekerjaan, Price Per Unit, Qty, Unit, Total Price, Total Billed, Delivery Progress (%), GR Amount, GR Progress (%), Balance, ACT ID, Site ID</strong>.
+        Untuk fitur detail invoice: tambahkan kolom <strong>Link PDF</strong> di sheet utama. Tab PO Master butuh kolom: <strong>No PO, Nilai PO, Nama Pekerjaan, Link PDF PO</strong>.
       </div>
       <label class="modal-label">Nama Tab Sheet</label>
       <input type="text" id="defaultSheetName" placeholder="Sheet1" value="Sheet1">
-      <label class="modal-label">Nama Tab Detail Item (untuk detail invoice)</label>
+      <label class="modal-label">Nama Tab Detail Item</label>
       <input type="text" id="defaultDetailSheetName" placeholder="Detail" value="Detail">
-      <label class="modal-label">Nama Tab PO Master (untuk Milestone PO)</label>
+      <label class="modal-label">Nama Tab PO Master</label>
       <input type="text" id="defaultPOMasterSheetName" placeholder="PO Master" value="PO Master">
-      <div class="config-hint" style="margin-top:4px">
-        Tab PO Master butuh kolom: <strong>No PO, Nilai PO, Nama Pekerjaan</strong>.
+
+      <!-- Password config -->
+      <div class="pwd-config-block">
+        <div class="pcb-label">🔐 Password Dokumen PO</div>
+        <label class="modal-label" style="margin-bottom:6px">Password untuk lihat & download PDF PO</label>
+        <input type="password" id="defaultPwdInput" placeholder="Kosongkan = tanpa password" style="margin-bottom:4px">
+        <div class="pcb-hint">Password ini digunakan untuk semua dokumen PO. Jika dikosongkan, PDF langsung terbuka tanpa proteksi.</div>
       </div>
+
       <div class="error-msg" id="defaultError"></div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="hideConfig()">Batal</button>
@@ -387,16 +424,18 @@
       <input type="text" id="sheetIdInput" placeholder="Contoh: 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
       <label class="modal-label">Nama Tab Sheet</label>
       <input type="text" id="sheetNameInput" placeholder="Sheet1" value="Sheet1">
-      <label class="modal-label">Nama Tab Detail Item (untuk detail invoice)</label>
+      <label class="modal-label">Nama Tab Detail Item</label>
       <input type="text" id="detailSheetNameInput" placeholder="Detail" value="Detail">
-      <div class="config-hint" style="margin-top:4px;margin-bottom:10px">
-        Tab detail butuh kolom: No Invoice, PO Item, Nama Pekerjaan, Price Per Unit, Qty, Unit, Total Price, Total Billed, Delivery Progress (%), GR Amount, GR Progress (%), Balance, ACT ID, Site ID.
-      </div>
-      <label class="modal-label">Nama Tab PO Master (untuk Milestone PO)</label>
+      <label class="modal-label">Nama Tab PO Master</label>
       <input type="text" id="poMasterSheetNameInput" placeholder="PO Master" value="PO Master">
-      <div class="config-hint" style="margin-top:4px;margin-bottom:10px">
-        Tab PO Master butuh kolom: No PO, Nilai PO, Nama Pekerjaan.
+
+      <div class="pwd-config-block">
+        <div class="pcb-label">🔐 Password Dokumen PO</div>
+        <label class="modal-label" style="margin-bottom:6px">Password untuk lihat & download PDF PO</label>
+        <input type="password" id="customPwdInput" placeholder="Kosongkan = tanpa password" style="margin-bottom:4px">
+        <div class="pcb-hint">Password ini digunakan untuk semua dokumen PO. Jika dikosongkan, PDF langsung terbuka tanpa proteksi.</div>
       </div>
+
       <div class="error-msg" id="configError"></div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="hideConfig()">Batal</button>
@@ -425,11 +464,8 @@
   <div class="modal modal-lg" style="position:relative">
     <button class="detail-close-btn" onclick="closeInvoiceDetail()" aria-label="Tutup">✕</button>
     <h3 id="detailModalTitle">📄 Detail Invoice</h3>
-
     <div class="detail-info-grid" id="detailInfoGrid"></div>
-
     <div class="detail-pdf-row" id="detailPdfRow"></div>
-
     <div class="detail-section-title">Detail Item / Site</div>
     <div class="detail-table-wrap">
       <table>
@@ -452,11 +488,15 @@
   <div class="modal modal-lg" style="position:relative">
     <button class="detail-close-btn" onclick="closePOMilestoneDetail()" aria-label="Tutup">✕</button>
     <h3 id="poDetailModalTitle">📦 Detail Milestone PO</h3>
-
     <div class="detail-info-grid" id="poDetailInfoGrid"></div>
-
     <div style="margin-bottom:18px">
       <div class="milestone-bar-wrap" style="height:10px"><div class="milestone-bar" id="poDetailBar" style="width:0%"></div></div>
+    </div>
+
+    <!-- PDF PO document section -->
+    <div id="poPdfSection" style="margin-bottom:18px">
+      <div class="detail-section-title">Dokumen PO</div>
+      <div id="poPdfBtnArea"></div>
     </div>
 
     <div class="detail-section-title">Invoice dari PO Ini</div>
@@ -472,6 +512,36 @@
       </table>
     </div>
   </div>
+</div>
+
+<!-- PDF PASSWORD PROMPT -->
+<div class="pdf-pwd-overlay" id="pdfPwdOverlay" style="display:none">
+  <div class="pdf-pwd-box">
+    <div class="lock-icon">🔐</div>
+    <h4>Dokumen Dilindungi</h4>
+    <p id="pdfPwdDesc">Masukkan password untuk mengakses dokumen PO ini.</p>
+    <div class="pwd-input-wrap">
+      <input type="password" id="pdfPwdField" placeholder="Masukkan password…" onkeydown="if(event.key==='Enter')checkPdfPwd()">
+      <button class="pwd-toggle" onclick="togglePwdVisibility()" title="Tampilkan/sembunyikan">👁</button>
+    </div>
+    <div class="pwd-error" id="pdfPwdError"></div>
+    <div class="pwd-actions">
+      <button class="btn-secondary" onclick="closePdfPwd()">Batal</button>
+      <button class="btn-primary" onclick="checkPdfPwd()">Buka Dokumen</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF VIEWER -->
+<div class="pdf-viewer-overlay" id="pdfViewerOverlay" style="display:none">
+  <div class="pdf-viewer-header">
+    <h4 id="pdfViewerTitle">📄 Dokumen PO</h4>
+    <div class="pdf-viewer-actions">
+      <a id="pdfViewerDownload" href="#" target="_blank" class="btn-pdf" style="font-size:11px;padding:6px 12px">⬇ Download PDF</a>
+      <button class="btn-secondary" onclick="closePdfViewer()" style="font-size:11px">✕ Tutup</button>
+    </div>
+  </div>
+  <div class="pdf-viewer-body" id="pdfViewerBody"></div>
 </div>
 
 <!-- HEADER -->
@@ -494,13 +564,12 @@
   </div>
 </div>
 
-
-<!-- DRAWER OVERLAY (mobile only) -->
+<!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeFilterDrawer()"></div>
 
 <!-- MAIN -->
 <div class="main">
-  <!-- SIDEBAR / MOBILE FILTER DRAWER -->
+  <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <button class="drawer-close-btn" onclick="closeFilterDrawer()" aria-label="Tutup filter">✕</button>
     <div class="filter-title">⬡ FILTER</div>
@@ -579,12 +648,13 @@
           <div class="kpi-sub">Aktivitas</div>
         </div>
       </div>
+      <!-- CHANGED: was Average Invoice Value, now Total Nilai PO -->
       <div class="kpi-card">
-        <div class="kpi-icon">💡</div>
+        <div class="kpi-icon" style="background:rgba(234,179,8,0.15)">📋</div>
         <div>
-          <div class="kpi-label">Average Invoice Value</div>
-          <div class="kpi-val orange" id="kpiAvgValue">–</div>
-          <div class="kpi-sub">Per Invoice</div>
+          <div class="kpi-label">Total Nilai PO</div>
+          <div class="kpi-val orange nilai-po" id="kpiTotalNilaiPO">–</div>
+          <div class="kpi-sub" id="kpiNilaiPOSub">– PO terinvoice</div>
         </div>
       </div>
       <div class="kpi-card">
@@ -605,22 +675,22 @@
       </div>
     </div>
 
-    <!-- ROW 1: Trend + Donut -->
+    <!-- ROW 1 -->
     <div class="charts-row charts-row-1">
       <div class="chart-card">
         <div class="chart-title">Trend Invoice Value per Periode</div>
         <div class="chart-wrap" style="height:200px">
-          <canvas id="chartTrend" role="img" aria-label="Trend invoice value per periode"></canvas>
+          <canvas id="chartTrend"></canvas>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Invoice Value by Tipe Pekerjaan</div>
         <div class="donut-area">
           <div class="donut-wrap">
-            <canvas id="chartDonut" role="img" aria-label="Donut invoice by tipe"></canvas>
+            <canvas id="chartDonut"></canvas>
             <div class="donut-center">
               <div class="big" id="donutCenter">–</div>
-              <div class="sm">Miliar</div>
+              <div class="sm" id="donutCenterUnit">Miliar</div>
             </div>
           </div>
           <div class="donut-legend" id="donutLegend"></div>
@@ -628,18 +698,18 @@
       </div>
     </div>
 
-    <!-- ROW 2: Bar PO + Stacked + Monthly List -->
+    <!-- ROW 2 -->
     <div class="charts-row charts-row-2">
       <div class="chart-card">
         <div class="chart-title">Invoice Value by PO (Top 10)</div>
         <div class="chart-wrap" id="barPOWrap" style="height:220px">
-          <canvas id="chartBarPO" role="img" aria-label="Bar invoice by PO top 10"></canvas>
+          <canvas id="chartBarPO"></canvas>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Invoice Value per Periode by Tipe Pekerjaan</div>
         <div class="chart-wrap" style="height:220px">
-          <canvas id="chartStacked" role="img" aria-label="Stacked bar invoice per periode by tipe"></canvas>
+          <canvas id="chartStacked"></canvas>
         </div>
       </div>
       <div class="chart-card">
@@ -648,12 +718,13 @@
       </div>
     </div>
 
-    <!-- ROW 3: Distribusi + Table -->
+    <!-- ROW 3 -->
     <div class="charts-row charts-row-3">
       <div class="chart-card">
         <div class="chart-title">Milestone PO</div>
         <div class="milestone-summary" id="milestoneSummary"></div>
         <div class="milestone-list" id="milestoneList"></div>
+        <div class="milestone-click-hint">Klik item PO untuk lihat detail & dokumen</div>
       </div>
       <div class="table-card">
         <div class="table-header">
@@ -677,7 +748,7 @@
   </div>
 </div>
 
-<!-- BOTTOM NAV (mobile only) -->
+<!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <button class="bottom-nav-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <span class="bn-icon">📊</span>KPI
@@ -700,12 +771,10 @@ const DEFAULT_SHEET_NAME = 'Sheet1';
 const DEFAULT_DETAIL_SHEET_NAME = 'Detail';
 const DEFAULT_PO_MASTER_SHEET_NAME = 'PO Master';
 
-// Urutan bulan Indonesia untuk sorting kolom Periode
 const PERIODE_ORDER = [
   'Januari','Februari','Maret','April','Mei','Juni',
   'Juli','Agustus','September','Oktober','November','Desember'
 ];
-// Fallback jika Periode pakai nama Inggris
 const PERIODE_ORDER_EN = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December'
@@ -729,6 +798,11 @@ let showAll      = false;
 let charts       = {};
 let activeTab    = 'default';
 
+// PDF password state
+let _pendingPdfUrl   = '';
+let _pendingPdfTitle = '';
+let _pendingPdfAction = ''; // 'view' | 'download'
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.table-wrap')?.addEventListener('click', e => {
@@ -745,6 +819,11 @@ window.addEventListener('DOMContentLoaded', () => {
     openPOMilestoneDetail(item.dataset.po);
   });
 
+  // Allow pressing Enter in PDF password field
+  document.getElementById('pdfPwdField')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPdfPwd();
+  });
+
   const savedId   = localStorage.getItem('inv_sheet_id');
   const savedName = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
   const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
@@ -757,13 +836,12 @@ window.addEventListener('DOMContentLoaded', () => {
     setSourceIndicator('Custom Sheet');
     fetchSheetData(savedId, savedName, savedDetailName, savedPOMasterName);
   } else {
-    // default
     setSourceIndicator('Sheet Default');
     fetchSheetData(DEFAULT_SHEET_ID, savedName, savedDetailName, savedPOMasterName);
   }
 });
 
-// ─── MOBILE FILTER DRAWER ───────────────────────────────────────────────────────
+// ─── MOBILE ──────────────────────────────────────────────────────────────────
 function openFilterDrawer() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
@@ -779,7 +857,93 @@ function scrollToTable() {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ─── INVOICE DETAIL MODAL ───────────────────────────────────────────────────────
+// ─── PDF PASSWORD SYSTEM ──────────────────────────────────────────────────────
+function getPdfPassword() {
+  return localStorage.getItem('inv_pdf_pwd') || '';
+}
+
+function togglePwdVisibility() {
+  const inp = document.getElementById('pdfPwdField');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// Called when user clicks "Lihat Dokumen PO" or "Download PDF PO"
+function requestPdfAccess(url, title, action) {
+  const pwd = getPdfPassword();
+  if (!pwd) {
+    // No password set — open directly
+    if (action === 'download') {
+      openDownloadDirect(url);
+    } else {
+      openPdfViewer(url, title);
+    }
+    return;
+  }
+  // Password required — show prompt
+  _pendingPdfUrl    = url;
+  _pendingPdfTitle  = title;
+  _pendingPdfAction = action;
+  document.getElementById('pdfPwdField').value = '';
+  document.getElementById('pdfPwdError').textContent = '';
+  document.getElementById('pdfPwdDesc').textContent =
+    `Masukkan password untuk mengakses dokumen: "${title}"`;
+  document.getElementById('pdfPwdOverlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('pdfPwdField').focus(), 100);
+}
+
+function checkPdfPwd() {
+  const entered = document.getElementById('pdfPwdField').value;
+  const correct = getPdfPassword();
+  if (entered === correct) {
+    closePdfPwd();
+    if (_pendingPdfAction === 'download') {
+      openDownloadDirect(_pendingPdfUrl);
+    } else {
+      openPdfViewer(_pendingPdfUrl, _pendingPdfTitle);
+    }
+  } else {
+    document.getElementById('pdfPwdError').textContent = '❌ Password salah. Coba lagi.';
+    document.getElementById('pdfPwdField').select();
+  }
+}
+
+function closePdfPwd() {
+  document.getElementById('pdfPwdOverlay').style.display = 'none';
+  document.getElementById('pdfPwdField').value = '';
+  document.getElementById('pdfPwdError').textContent = '';
+}
+
+function openDownloadDirect(url) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function openPdfViewer(url, title) {
+  document.getElementById('pdfViewerTitle').textContent = `📄 ${title}`;
+  document.getElementById('pdfViewerDownload').href = url;
+
+  // Try iframe embed; some PDF hosts block iframe
+  const body = document.getElementById('pdfViewerBody');
+  // Use Google Docs viewer as fallback for cross-origin PDFs
+  const embedUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+  body.innerHTML = `<iframe src="${embedUrl}" class="pdf-iframe-wrap" allowfullscreen></iframe>`;
+
+  document.getElementById('pdfViewerOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closePdfViewer() {
+  document.getElementById('pdfViewerOverlay').style.display = 'none';
+  document.getElementById('pdfViewerBody').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+// ─── INVOICE DETAIL MODAL ────────────────────────────────────────────────────
 function openInvoiceDetail(inv) {
   const noInv = inv['No Invoice'];
   document.getElementById('detailModalTitle').textContent = `📄 Detail Invoice — ${noInv}`;
@@ -802,13 +966,12 @@ function openInvoiceDetail(inv) {
     <div class="detail-info-item"><div class="di-label">Bulan Tanggal</div><div class="di-val">${inv['Bulan Tanggal']||'–'}</div></div>
   `;
 
-  // PDF button
   const pdfLink = String(inv['Link PDF']||'').trim();
   document.getElementById('detailPdfRow').innerHTML = pdfLink
-    ? `<a class="btn-pdf" href="${pdfLink}" target="_blank" rel="noopener">📄 Buka PDF Invoice</a>`
+    ? `<button class="btn-pdf" onclick="requestPdfAccess('${pdfLink}','Invoice ${noInv}','view')">📄 Lihat PDF Invoice</button>
+       <button class="btn-pdf" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border)" onclick="requestPdfAccess('${pdfLink}','Invoice ${noInv}','download')">⬇ Download</button>`
     : `<span class="btn-pdf disabled">📄 PDF belum tersedia</span>`;
 
-  // Line items
   const items = detailData.filter(d => d['No Invoice'] === noInv);
   const body = document.getElementById('detailItemsBody');
   const foot = document.getElementById('detailItemsFoot');
@@ -835,7 +998,6 @@ function openInvoiceDetail(inv) {
         <td>${Number(it['Balance']||0).toLocaleString('id-ID')}</td>
       </tr>
     `).join('');
-
     const sum = key => items.reduce((s,it) => s + (+it[key]||0), 0);
     foot.innerHTML = `
       <tr>
@@ -849,7 +1011,6 @@ function openInvoiceDetail(inv) {
       </tr>
     `;
   }
-
   document.getElementById('invoiceDetailModal').style.display = 'flex';
 }
 function closeInvoiceDetail() {
@@ -871,12 +1032,15 @@ function switchTab(tab) {
 function openConfig() {
   const src = localStorage.getItem('inv_source') || 'default';
   switchTab(src === 'custom' ? 'custom' : src === 'demo' ? 'demo' : 'default');
-  const savedDetailName = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
-  document.getElementById('defaultDetailSheetName').value = savedDetailName;
-  document.getElementById('detailSheetNameInput').value   = savedDetailName;
+  const savedDetailName   = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
   const savedPOMasterName = localStorage.getItem('inv_po_master_sheet_name') || DEFAULT_PO_MASTER_SHEET_NAME;
+  const savedPwd          = localStorage.getItem('inv_pdf_pwd') || '';
+  document.getElementById('defaultDetailSheetName').value   = savedDetailName;
+  document.getElementById('detailSheetNameInput').value     = savedDetailName;
   document.getElementById('defaultPOMasterSheetName').value = savedPOMasterName;
-  document.getElementById('poMasterSheetNameInput').value    = savedPOMasterName;
+  document.getElementById('poMasterSheetNameInput').value   = savedPOMasterName;
+  document.getElementById('defaultPwdInput').value = savedPwd;
+  document.getElementById('customPwdInput').value  = savedPwd;
   if (src === 'custom') {
     document.getElementById('sheetIdInput').value   = localStorage.getItem('inv_sheet_id') || '';
     document.getElementById('sheetNameInput').value = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
@@ -888,13 +1052,16 @@ function hideConfig() {
 }
 
 function connectDefault() {
-  const name = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
-  const detailName = document.getElementById('defaultDetailSheetName').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
+  const name         = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
+  const detailName   = document.getElementById('defaultDetailSheetName').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   const poMasterName = document.getElementById('defaultPOMasterSheetName').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
+  const pwd          = document.getElementById('defaultPwdInput').value;
   localStorage.setItem('inv_source',     'default');
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
   localStorage.setItem('inv_po_master_sheet_name', poMasterName);
+  if (pwd) localStorage.setItem('inv_pdf_pwd', pwd);
+  else localStorage.removeItem('inv_pdf_pwd');
   localStorage.removeItem('inv_sheet_id');
   hideConfig();
   setSourceIndicator('Sheet Default');
@@ -903,16 +1070,19 @@ function connectDefault() {
 }
 
 function connectCustom() {
-  const id   = document.getElementById('sheetIdInput').value.trim();
-  const name = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
-  const detailName = document.getElementById('detailSheetNameInput').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
+  const id           = document.getElementById('sheetIdInput').value.trim();
+  const name         = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
+  const detailName   = document.getElementById('detailSheetNameInput').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   const poMasterName = document.getElementById('poMasterSheetNameInput').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
+  const pwd          = document.getElementById('customPwdInput').value;
   if (!id) { showErr('configError', 'Sheet ID tidak boleh kosong.'); return; }
   localStorage.setItem('inv_source',     'custom');
   localStorage.setItem('inv_sheet_id',   id);
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
   localStorage.setItem('inv_po_master_sheet_name', poMasterName);
+  if (pwd) localStorage.setItem('inv_pdf_pwd', pwd);
+  else localStorage.removeItem('inv_pdf_pwd');
   hideConfig();
   setSourceIndicator('Custom Sheet');
   showLoading('Mengambil data dari Google Sheets…');
@@ -929,8 +1099,8 @@ function useDummyData() {
 function loadDemo() {
   showLoading('Memuat data demo…');
   setTimeout(() => {
-    rawData = generateDummyData();
-    detailData = generateDummyDetailData(rawData);
+    rawData      = generateDummyData();
+    detailData   = generateDummyDetailData(rawData);
     poMasterData = generateDummyPOMasterData();
     onDataReady();
   }, 600);
@@ -959,7 +1129,6 @@ function fetchSheetData(sheetId, sheetName, detailSheetName, poMasterSheetName) 
         showConfig_withError('Gagal parsing data. Cek apakah sheet sudah dibagikan (Anyone with link – Viewer).');
         return;
       }
-      // Detail & PO Master tabs are best-effort: fetched separately so their failure never blocks the main dashboard
       fetchDetailSheetData(sheetId, detailSheetName || DEFAULT_DETAIL_SHEET_NAME);
       fetchPOMasterData(sheetId, poMasterSheetName || DEFAULT_PO_MASTER_SHEET_NAME);
     })
@@ -969,8 +1138,6 @@ function fetchSheetData(sheetId, sheetName, detailSheetName, poMasterSheetName) 
     });
 }
 
-// Best-effort fetch of the line-item detail tab. Silently results in an empty
-// detailData array if the tab doesn't exist yet, so it never breaks the dashboard.
 function fetchDetailSheetData(sheetId, detailSheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(detailSheetName)}`;
   fetch(url)
@@ -979,17 +1146,11 @@ function fetchDetailSheetData(sheetId, detailSheetName) {
       try {
         const json = JSON.parse(text.substring(47, text.length - 2));
         detailData = parseGvizDetailData(json);
-      } catch(e) {
-        detailData = [];
-      }
+      } catch(e) { detailData = []; }
     })
     .catch(() => { detailData = []; });
 }
 
-// Best-effort fetch of the "PO Master" tab (No PO, Nilai PO, Nama Pekerjaan).
-// Used to power the Milestone PO card (nilai PO vs sudah/belum terinvoice).
-// Re-renders just the Milestone PO card once loaded, since it arrives after
-// the main dashboard has already rendered.
 function fetchPOMasterData(sheetId, poMasterSheetName) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(poMasterSheetName)}`;
   fetch(url)
@@ -998,13 +1159,13 @@ function fetchPOMasterData(sheetId, poMasterSheetName) {
       try {
         const json = JSON.parse(text.substring(47, text.length - 2));
         poMasterData = parseGvizPOMasterData(json);
-      } catch(e) {
-        poMasterData = [];
-      }
+      } catch(e) { poMasterData = []; }
       renderMilestonePO(filteredData);
+      renderKpiNilaiPO(filteredData);
     })
-    .catch(() => { poMasterData = []; renderMilestonePO(filteredData); });
+    .catch(() => { poMasterData = []; renderMilestonePO(filteredData); renderKpiNilaiPO(filteredData); });
 }
+
 function showConfig_withError(msg) {
   openConfig();
   const errId = activeTab === 'custom' ? 'configError' : 'defaultError';
@@ -1025,7 +1186,6 @@ function parseGvizData(json) {
     .filter(r => r['No Invoice']);
 }
 
-// Parses the "Detail" tab (line items per invoice: PO Item, Nama Pekerjaan, etc.)
 function parseGvizDetailData(json) {
   const cols = json.table.cols.map(c => c.label);
   return json.table.rows
@@ -1040,7 +1200,6 @@ function parseGvizDetailData(json) {
     .filter(r => r['No Invoice']);
 }
 
-// Parses the "PO Master" tab (No PO, Nilai PO, Nama Pekerjaan) used for Milestone PO.
 function parseGvizPOMasterData(json) {
   const cols = json.table.cols.map(c => c.label);
   return json.table.rows
@@ -1102,35 +1261,29 @@ function generateDummyData() {
   return invoices;
 }
 
-// Generates synthetic PO Master rows (No PO, Nilai PO, Nama Pekerjaan) matching
-// the same `pos` list used in generateDummyData, so the Milestone PO demo
-// preview looks realistic without a real "PO Master" sheet tab.
 function generateDummyPOMasterData() {
-  const poList = [
-    { po:'4110006476', nama:'Reengineering Site Jabodetabek',    nilai: 950e6  },
-    { po:'4110006233', nama:'Recbatt Regional Jawa Barat',       nilai: 620e6  },
-    { po:'4110006956', nama:'CET Site Migration',                nilai: 1450e6 },
-    { po:'4110006744', nama:'Validasi Inaktif Radio Nasional',   nilai: 780e6  },
-    { po:'4110006527', nama:'Reengineering Site Jawa Tengah',    nilai: 890e6  },
-    { po:'4110006599', nama:'Recbatt Regional Sumatera',         nilai: 540e6  },
-    { po:'4110006798', nama:'CET Optimasi Jaringan',             nilai: 1100e6 },
-    { po:'4110007034', nama:'Reengineering Site Jawa Timur',     nilai: 1020e6 },
-    { po:'4110006687', nama:'Validasi Inaktif Radio Regional',   nilai: 460e6  },
-    { po:'4110006769', nama:'Recbatt Regional Kalimantan',       nilai: 610e6  },
+  return [
+    { 'No PO':'4110006476','Nama Pekerjaan':'Reengineering Site Jabodetabek',  'Nilai PO':950e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006233','Nama Pekerjaan':'Recbatt Regional Jawa Barat',     'Nilai PO':620e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006956','Nama Pekerjaan':'CET Site Migration',              'Nilai PO':1450e6, 'Link PDF PO':'' },
+    { 'No PO':'4110006744','Nama Pekerjaan':'Validasi Inaktif Radio Nasional', 'Nilai PO':780e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006527','Nama Pekerjaan':'Reengineering Site Jawa Tengah',  'Nilai PO':890e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006599','Nama Pekerjaan':'Recbatt Regional Sumatera',       'Nilai PO':540e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006798','Nama Pekerjaan':'CET Optimasi Jaringan',           'Nilai PO':1100e6, 'Link PDF PO':'' },
+    { 'No PO':'4110007034','Nama Pekerjaan':'Reengineering Site Jawa Timur',   'Nilai PO':1020e6, 'Link PDF PO':'' },
+    { 'No PO':'4110006687','Nama Pekerjaan':'Validasi Inaktif Radio Regional', 'Nilai PO':460e6,  'Link PDF PO':'' },
+    { 'No PO':'4110006769','Nama Pekerjaan':'Recbatt Regional Kalimantan',     'Nilai PO':610e6,  'Link PDF PO':'' },
   ];
-  return poList.map(p => ({ 'No PO': p.po, 'Nilai PO': p.nilai, 'Nama Pekerjaan': p.nama }));
 }
 
-// Generates synthetic line-item detail rows for each demo invoice, so the
-// invoice-detail modal can be previewed without a real "Detail" sheet tab.
 function generateDummyDetailData(invoices) {
   const siteNames = ['PAD019','PAD185','PAD503','PAD542','PAD572','BKS021','BKS114','TGR087'];
   const jobs = [
-    { name: 'Dismantle ANT3_Sum', price: 869400 },
-    { name: 'Reposisi RRU+Ins Mat_Sum', price: 1938418 },
-    { name: 'Site Survey_Sum', price: 433382 },
-    { name: 'Antenna Modernization Service Onl', price: 15264802 },
-    { name: '1st Tier Optim (2 Tech)_Sum', price: 5930550 },
+    { name: 'Dismantle ANT3_Sum',           price: 869400 },
+    { name: 'Reposisi RRU+Ins Mat_Sum',     price: 1938418 },
+    { name: 'Site Survey_Sum',              price: 433382 },
+    { name: 'Antenna Modernization Service', price: 15264802 },
+    { name: '1st Tier Optim (2 Tech)_Sum',  price: 5930550 },
   ];
   const rows = [];
   let poItem = 10;
@@ -1142,20 +1295,20 @@ function generateDummyDetailData(invoices) {
       const qty = 1 + Math.floor(Math.random() * 3);
       const total = job.price * qty;
       rows.push({
-        'No Invoice':             inv['No Invoice'],
-        'PO Item':                poItem,
-        'Nama Pekerjaan':         `${site}_${job.name}`,
-        'Price Per Unit':         job.price,
-        'Qty':                    qty,
-        'Unit':                   'UNT',
-        'Total Price':            total,
-        'Total Billed':           total,
-        'Delivery Progress (%)':  100,
-        'GR Amount':              total,
-        'GR Progress (%)':        100,
-        'Balance':                0,
-        'ACT ID':                 inv['ACT ID'],
-        'Site ID':                site,
+        'No Invoice':            inv['No Invoice'],
+        'PO Item':               poItem,
+        'Nama Pekerjaan':        `${site}_${job.name}`,
+        'Price Per Unit':        job.price,
+        'Qty':                   qty,
+        'Unit':                  'UNT',
+        'Total Price':           total,
+        'Total Billed':          total,
+        'Delivery Progress (%)': 100,
+        'GR Amount':             total,
+        'GR Progress (%)':       100,
+        'Balance':               0,
+        'ACT ID':                inv['ACT ID'],
+        'Site ID':               site,
       });
       poItem += 10;
     }
@@ -1172,15 +1325,7 @@ function onDataReady() {
   hideLoading();
 }
 
-// ─── HELPERS: SORTING PERIODE ─────────────────────────────────────────────────
-function periodeSort(a, b) {
-  // Expects format "NamaBulan" (ID) or "NamaBulan YYYY" or "NamaBulan YYYY" — compare tahun first, then bulan
-  // Data: {periode: "Juni", tahun: 2026}
-  // We sort by (tahun, bulan index)
-  return 0; // handled in groupByPeriode
-}
-
-// Group data by (Tahun + Periode) and return sorted keys as "Periode|Tahun"
+// ─── SORTING / GROUPING HELPERS ───────────────────────────────────────────────
 function groupByPeriode(data) {
   const map = {};
   data.forEach(r => {
@@ -1191,16 +1336,13 @@ function groupByPeriode(data) {
     if (!map[key]) map[key] = 0;
     map[key] += (+r['Value Invoice'] || 0);
   });
-
   const keys = Object.keys(map).sort((a, b) => {
     const [pa, ta] = a.split('|');
     const [pb, tb] = b.split('|');
     const ya = parseInt(ta) || 0, yb = parseInt(tb) || 0;
     if (ya !== yb) return ya - yb;
-    const ia = periodeIndex(pa), ib = periodeIndex(pb);
-    return ia - ib;
+    return periodeIndex(pa) - periodeIndex(pb);
   });
-
   return { map, keys };
 }
 
@@ -1215,16 +1357,54 @@ function periodeLabel(key) {
   return `${p} ${t}`;
 }
 
+// ─── FORMAT HELPERS ───────────────────────────────────────────────────────────
+/**
+ * Format a rupiah value with explicit unit label.
+ * Returns e.g.  "Rp 1,23 Miliar" / "Rp 450,00 Juta" / "Rp 850.000"
+ */
+function formatRp(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return `Rp ${(v/1e9).toFixed(2)} Miliar`;
+  if (abs >= 1e6) return `Rp ${(v/1e6).toFixed(2)} Juta`;
+  return `Rp ${v.toLocaleString('id-ID')}`;
+}
+
+/**
+ * Compact KPI label — always shows unit suffix.
+ * e.g. "1,23 M" (Miliar), "450 Jt" (Juta)
+ */
+function formatKpi(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return `${(v/1e9).toFixed(2)} M`;
+  if (abs >= 1e6) return `${(v/1e6).toFixed(0)} Jt`;
+  return v.toLocaleString('id-ID');
+}
+
+/**
+ * For tooltip / sidebar summary — full Rp with unit
+ */
+function formatM(v) { return formatRp(v); }
+
+/**
+ * Monthly list value: always show amount + explicit unit badge info
+ * Returns { amount: string, unit: string }
+ */
+function formatMonthly(v) {
+  const abs = Math.abs(v);
+  if (abs >= 1e9) return { amount: `Rp ${(v/1e9).toFixed(3)}`, unit: 'Miliar' };
+  if (abs >= 1e6) return { amount: `Rp ${(v/1e6).toFixed(2)}`, unit: 'Juta' };
+  return { amount: `Rp ${v.toLocaleString('id-ID')}`, unit: '' };
+}
+
 // ─── POPULATE FILTERS ─────────────────────────────────────────────────────────
 function populateFilters() {
   const tahuns   = [...new Set(rawData.map(r => String(r['Tahun']||'')))].filter(Boolean).sort();
   const periodes = [...new Set(rawData.map(r => String(r['Periode']||'')))].filter(Boolean)
     .sort((a,b) => periodeIndex(a) - periodeIndex(b));
-  const tipes = [...new Set(rawData.map(r => r['Tipe Pekerjaan']))].filter(Boolean).sort();
-  const poses = [...new Set(rawData.map(r => String(r['No PO']||'')))].filter(Boolean).sort();
-  const acts  = [...new Set(rawData.map(r => String(r['ACT ID']||'')))].filter(Boolean).sort();
+  const tipes    = [...new Set(rawData.map(r => r['Tipe Pekerjaan']))].filter(Boolean).sort();
+  const poses    = [...new Set(rawData.map(r => String(r['No PO']||'')))].filter(Boolean).sort();
+  const acts     = [...new Set(rawData.map(r => String(r['ACT ID']||'')))].filter(Boolean).sort();
   const statuses = [...new Set(rawData.map(r => String(r['Paid']||'').trim()))].filter(Boolean).sort();
-
   fillSelect('fTahun',   tahuns);
   fillSelect('fPeriode', periodes);
   fillSelect('fTipe',    tipes);
@@ -1250,19 +1430,16 @@ function applyFilters() {
   const fS  = document.getElementById('fStatus').value;
 
   filteredData = rawData.filter(r =>
-    (!fT  || String(r['Tahun'])         === fT)  &&
-    (!fP  || String(r['Periode'])       === fP)  &&
-    (!fTp || r['Tipe Pekerjaan']        === fTp) &&
-    (!fPO || String(r['No PO'])         === fPO) &&
-    (!fA  || String(r['ACT ID'])        === fA)  &&
+    (!fT  || String(r['Tahun'])           === fT)  &&
+    (!fP  || String(r['Periode'])         === fP)  &&
+    (!fTp || r['Tipe Pekerjaan']          === fTp) &&
+    (!fPO || String(r['No PO'])           === fPO) &&
+    (!fA  || String(r['ACT ID'])          === fA)  &&
     (!fS  || String(r['Paid']||'').trim() === fS)
   );
 
-  const periodeLabel2 = fP
-    ? (fT ? `${fP} ${fT}` : fP)
-    : (fT ? `Tahun ${fT}` : 'All Periode');
-  document.getElementById('sumPeriode').textContent = periodeLabel2;
-
+  const pl = fP ? (fT ? `${fP} ${fT}` : fP) : (fT ? `Tahun ${fT}` : 'All Periode');
+  document.getElementById('sumPeriode').textContent = pl;
   renderAll();
 }
 
@@ -1279,7 +1456,6 @@ function renderAll() {
   const totalInv = data.length;
   const totalPO  = new Set(data.map(r=>r['No PO'])).size;
   const totalACT = new Set(data.map(r=>r['ACT ID'])).size;
-  const avgVal   = totalInv ? totalVal / totalInv : 0;
 
   const paidRows   = data.filter(r => String(r['Paid']||'').trim().toLowerCase() === 'paid');
   const unpaidRows = data.filter(r => String(r['Paid']||'').trim().toLowerCase() === 'unpaid');
@@ -1287,26 +1463,25 @@ function renderAll() {
   const unpaidVal  = unpaidRows.reduce((s,r) => s + (+r['Value Invoice']||0), 0);
 
   // KPI
-  document.getElementById('kpiTotalValue').textContent    = formatM(totalVal);
+  document.getElementById('kpiTotalValue').textContent    = formatKpi(totalVal);
   document.getElementById('kpiTotalValueSub').textContent = `${totalInv} Invoice`;
   document.getElementById('kpiTotalInvoice').textContent  = totalInv;
   document.getElementById('kpiTotalPO').textContent       = totalPO;
   document.getElementById('kpiTotalACT').textContent      = totalACT;
-  document.getElementById('kpiAvgValue').textContent      = formatJuta(avgVal);
-  document.getElementById('kpiPaidValue').textContent     = formatM(paidVal);
+  document.getElementById('kpiPaidValue').textContent     = formatKpi(paidVal);
   document.getElementById('kpiPaidSub').textContent       = `${paidRows.length} Invoice`;
-  document.getElementById('kpiUnpaidValue').textContent   = formatM(unpaidVal);
+  document.getElementById('kpiUnpaidValue').textContent   = formatKpi(unpaidVal);
   document.getElementById('kpiUnpaidSub').textContent     = `${unpaidRows.length} Invoice`;
-  document.getElementById('sumValue').textContent         = formatM(totalVal);
+  document.getElementById('sumValue').textContent         = formatRp(totalVal);
   document.getElementById('sumCount').textContent         = `${totalInv} Invoice`;
 
-  // GROUP BY PERIODE (kolom Periode + Tahun)
-  const { map: periodeMap, keys: periodeKeys } = groupByPeriode(data);
+  renderKpiNilaiPO(data);
 
-  // Trend
+  // Grouping periode
+  const { map: periodeMap, keys: periodeKeys } = groupByPeriode(data);
   renderTrend(periodeKeys, periodeMap);
 
-  // Donut by tipe
+  // Donut
   const tipeMap = {};
   data.forEach(r => {
     const t = r['Tipe Pekerjaan'] || 'Lain-lain';
@@ -1324,7 +1499,7 @@ function renderAll() {
   });
   renderBarPO(Object.entries(poMap).sort((a,b)=>b[1]-a[1]).slice(0,10));
 
-  // Stacked by tipe x periode
+  // Stacked
   const allTipes = [...new Set(rawData.map(r=>r['Tipe Pekerjaan']))].filter(Boolean);
   renderStacked(periodeKeys, allTipes, data);
 
@@ -1336,6 +1511,24 @@ function renderAll() {
 
   // Table
   renderTable(data);
+}
+
+// ─── KPI: TOTAL NILAI PO ──────────────────────────────────────────────────────
+// Shows total nilai PO from PO Master, and how many of those POs have been invoiced
+function renderKpiNilaiPO(data) {
+  const totalNilai = poMasterData.reduce((s, r) => s + (+r['Nilai PO']||0), 0);
+
+  // Count how many POs in master have at least one invoice in current filtered data
+  const invoicedPOs = new Set(data.map(r => String(r['No PO']||'').trim()).filter(Boolean));
+  const masterPOs   = poMasterData.map(r => String(r['No PO']||'').trim()).filter(Boolean);
+  const terinvoice  = masterPOs.filter(po => invoicedPOs.has(po)).length;
+  const totalMaster = masterPOs.length;
+
+  document.getElementById('kpiTotalNilaiPO').textContent = totalNilai > 0 ? formatKpi(totalNilai) : '–';
+  document.getElementById('kpiNilaiPOSub').textContent   =
+    totalMaster > 0
+      ? `${terinvoice} dari ${totalMaster} PO terinvoice`
+      : '– PO terinvoice';
 }
 
 // ─── CHART: TREND ─────────────────────────────────────────────────────────────
@@ -1358,10 +1551,10 @@ function renderTrend(periodeKeys, periodeMap) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Rp ${ctx.parsed.y.toFixed(2)} M` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Rp ${ctx.parsed.y.toFixed(2)} Juta` } } },
       scales: {
         x: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 } } },
-        y: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 }, callback: v => `${v.toFixed(1)}M` } }
+        y: { grid: { color: '#222' }, ticks: { color: '#888', font: { size: 10 }, callback: v => `${v.toFixed(1)} Jt` } }
       }
     }
   });
@@ -1370,7 +1563,12 @@ function renderTrend(periodeKeys, periodeMap) {
 // ─── CHART: DONUT ─────────────────────────────────────────────────────────────
 function renderDonut(tipeMap, totalVal) {
   const entries = Object.entries(tipeMap).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('donutCenter').textContent = (totalVal/1e9).toFixed(2);
+  // Choose unit dynamically
+  const useMilliar = totalVal >= 1e9;
+  document.getElementById('donutCenter').textContent = useMilliar
+    ? (totalVal/1e9).toFixed(2)
+    : (totalVal/1e6).toFixed(1);
+  document.getElementById('donutCenterUnit').textContent = useMilliar ? 'Miliar' : 'Juta';
 
   if (charts.donut) charts.donut.destroy();
   charts.donut = new Chart(document.getElementById('chartDonut'), {
@@ -1381,7 +1579,7 @@ function renderDonut(tipeMap, totalVal) {
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '65%',
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${formatM(ctx.parsed)}` } } }
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${formatRp(ctx.parsed)}` } } }
     }
   });
 
@@ -1391,26 +1589,32 @@ function renderDonut(tipeMap, totalVal) {
       <span class="legend-dot" style="background:${tipeColor(t)}"></span>
       <span class="legend-name">${t}</span>
       <span class="legend-pct">${pct}%</span>
-      <span class="legend-val">${formatM(v)}</span>
+      <span class="legend-val">${formatRp(v)}</span>
     </div>`;
   }).join('');
 }
 
 // ─── CHART: BAR PO ────────────────────────────────────────────────────────────
 function renderBarPO(poSorted) {
+  // Determine best unit for the axis
+  const maxVal = poSorted.length ? poSorted[0][1] : 0;
+  const useMilliar = maxVal >= 1e9;
+  const divisor = useMilliar ? 1e9 : 1e6;
+  const unitLabel = useMilliar ? 'M' : 'Jt';
+
   document.getElementById('barPOWrap').style.height = Math.max(180, poSorted.length*26+40)+'px';
   if (charts.barPO) charts.barPO.destroy();
   charts.barPO = new Chart(document.getElementById('chartBarPO'), {
     type: 'bar',
     data: {
       labels: poSorted.map(e=>e[0]),
-      datasets: [{ data: poSorted.map(e=>e[1]/1e6), backgroundColor: poSorted.map((_,i)=>i===0?'#e63c2f':'#f97316'), borderRadius:4, barThickness:16 }]
+      datasets: [{ data: poSorted.map(e=>e[1]/divisor), backgroundColor: poSorted.map((_,i)=>i===0?'#e63c2f':'#f97316'), borderRadius:4, barThickness:16 }]
     },
     options: {
       indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` Rp ${ctx.parsed.x.toFixed(2)} M` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${formatRp(ctx.parsed.x * divisor)}` } } },
       scales: {
-        x: { grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>`${v.toFixed(0)}M`} },
+        x: { grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>`${v.toFixed(1)} ${unitLabel}`} },
         y: { grid:{display:false}, ticks:{color:'#bbb',font:{size:10}} }
       }
     }
@@ -1420,12 +1624,24 @@ function renderBarPO(poSorted) {
 // ─── CHART: STACKED ───────────────────────────────────────────────────────────
 function renderStacked(periodeKeys, allTipes, data) {
   const labels = periodeKeys.map(k => { const [p,t]=k.split('|'); return `${p.substring(0,3)} '${String(t).slice(2)}`; });
+  const allVals = periodeKeys.flatMap(k => {
+    const [p, yr] = k.split('|');
+    return allTipes.map(t =>
+      data.filter(r => String(r['Periode'])===p && String(r['Tahun'])===yr && r['Tipe Pekerjaan']===t)
+        .reduce((s,r) => s+(+r['Value Invoice']||0), 0)
+    );
+  });
+  const maxVal = Math.max(...allVals, 0);
+  const useMilliar = maxVal >= 1e9;
+  const divisor = useMilliar ? 1e9 : 1e6;
+  const unitLabel = useMilliar ? 'M' : 'Jt';
+
   const datasets = allTipes.map(t => ({
     label: t,
     data: periodeKeys.map(k => {
       const [p, yr] = k.split('|');
       return data.filter(r => String(r['Periode'])===p && String(r['Tahun'])===yr && r['Tipe Pekerjaan']===t)
-        .reduce((s,r) => s+(+r['Value Invoice']||0), 0) / 1e6;
+        .reduce((s,r) => s+(+r['Value Invoice']||0), 0) / divisor;
     }),
     backgroundColor: tipeColor(t), stack: 'a', borderRadius: 2, barThickness: 20,
   }));
@@ -1436,10 +1652,10 @@ function renderStacked(periodeKeys, allTipes, data) {
     data: { labels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} M` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${formatRp(ctx.parsed.y * divisor)}` } } },
       scales: {
         x: { stacked:true, grid:{color:'#222'}, ticks:{color:'#888',font:{size:10}} },
-        y: { stacked:true, grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>`${v.toFixed(0)}M`} }
+        y: { stacked:true, grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>`${v.toFixed(1)} ${unitLabel}`} }
       }
     }
   });
@@ -1448,25 +1664,23 @@ function renderStacked(periodeKeys, allTipes, data) {
 // ─── MONTHLY LIST ─────────────────────────────────────────────────────────────
 function renderMonthlyList(periodeKeys, periodeMap) {
   const sorted = [...periodeKeys].reverse().slice(0, 7);
-  document.getElementById('monthlyList').innerHTML = sorted.map(k => `
-    <div class="monthly-item">
-      <div class="monthly-icon">📈</div>
-      <div class="monthly-info">
-        <div class="monthly-month">${periodeLabel(k)}</div>
-        <div class="monthly-amt">Rp ${(periodeMap[k]/1e6).toFixed(2)} M</div>
+  document.getElementById('monthlyList').innerHTML = sorted.map(k => {
+    const { amount, unit } = formatMonthly(periodeMap[k]);
+    return `
+      <div class="monthly-item">
+        <div class="monthly-icon">📈</div>
+        <div class="monthly-info">
+          <div class="monthly-month">${periodeLabel(k)}</div>
+          <div class="monthly-amt">${amount}${unit ? `<span class="monthly-unit">${unit}</span>` : ''}</div>
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // ─── MILESTONE PO ─────────────────────────────────────────────────────────────
-// Compares each PO's contract value (from the "PO Master" tab) against how
-// much of it has actually been invoiced (summed from the invoice data),
-// so users can see: total nilai PO, sudah terinvoice, dan belum terinvoice.
-let milestoneSourceData = []; // last invoice dataset used to compute the cards, reused when opening the detail popup
+let milestoneSourceData = [];
 
-// Reads the sidebar filter selects directly, so callers don't need to thread
-// filter state through renderAll(). Returns e.g. [{label:'Periode', val:'December'}].
 function getActiveFilterInfo() {
   const specs = [
     { id: 'fTahun',   label: 'Tahun' },
@@ -1484,7 +1698,6 @@ function getActiveFilterInfo() {
 function renderMilestonePO(data) {
   milestoneSourceData = data;
 
-  // Sum invoiced value per No PO from the (filtered) invoice rows
   const invoicedByPO = {};
   data.forEach(r => {
     const po = String(r['No PO'] || '').trim();
@@ -1495,15 +1708,11 @@ function renderMilestonePO(data) {
   const activeFilters = getActiveFilterInfo();
   const isFiltered = activeFilters.length > 0;
 
-  // When a filter is active, only consider POs that actually have an invoice matching
-  // the current filter. Otherwise every other PO in the master list would show up as
-  // "0% / belum terinvoice", which looks like their real lifetime progress but is
-  // really just "no invoice in this filtered slice" — a easy-to-misread false signal.
   const relevantMaster = isFiltered
     ? poMasterData.filter(r => invoicedByPO[String(r['No PO'] || '').trim()])
     : poMasterData;
 
-  const totalPOValue = relevantMaster.reduce((s, r) => s + (+r['Nilai PO'] || 0), 0);
+  const totalPOValue  = relevantMaster.reduce((s, r) => s + (+r['Nilai PO'] || 0), 0);
   const totalInvoiced = relevantMaster.reduce((s, r) => {
     const po = String(r['No PO'] || '').trim();
     const nilai = +r['Nilai PO'] || 0;
@@ -1512,20 +1721,20 @@ function renderMilestonePO(data) {
   const totalBelum = Math.max(totalPOValue - totalInvoiced, 0);
 
   const filterNote = isFiltered
-    ? `<div class="milestone-filter-note">⚠️ <span><strong>Filter aktif</strong> (${activeFilters.map(f => `${f.label}: ${f.val}`).join(', ')}) — hanya menampilkan PO yang punya invoice sesuai filter ini. Angka di bawah <u>bukan</u> total keseluruhan PO, hanya untuk PO yang relevan dengan filter.</span></div>`
+    ? `<div class="milestone-filter-note">⚠️ <span><strong>Filter aktif</strong> (${activeFilters.map(f=>`${f.label}: ${f.val}`).join(', ')}) — hanya PO yang punya invoice sesuai filter.</span></div>`
     : '';
 
   document.getElementById('milestoneSummary').innerHTML = `
     ${filterNote}
-    <div class="milestone-stat"><div class="ms-label">Total Nilai PO${isFiltered ? ' (Relevan)' : ''}</div><div class="ms-val">${formatM(totalPOValue)}</div></div>
-    <div class="milestone-stat orange"><div class="ms-label">Sudah Terinvoice</div><div class="ms-val">${formatM(totalInvoiced)}</div></div>
-    <div class="milestone-stat"><div class="ms-label">Belum Terinvoice</div><div class="ms-val">${formatM(totalBelum)}</div></div>
+    <div class="milestone-stat"><div class="ms-label">Total Nilai PO${isFiltered?' (Relevan)':''}</div><div class="ms-val">${formatRp(totalPOValue)}</div></div>
+    <div class="milestone-stat orange"><div class="ms-label">Sudah Terinvoice</div><div class="ms-val">${formatRp(totalInvoiced)}</div></div>
+    <div class="milestone-stat"><div class="ms-label">Belum Terinvoice</div><div class="ms-val">${formatRp(totalBelum)}</div></div>
   `;
 
   if (!relevantMaster.length) {
     document.getElementById('milestoneList').innerHTML = isFiltered
-      ? `<div class="milestone-empty">Tidak ada PO dengan invoice yang cocok dengan filter ini.</div>`
-      : `<div class="milestone-empty">Belum ada data PO Master. Tambahkan tab <strong>"PO Master"</strong> di sheet dengan kolom: No PO, Nilai PO, Nama Pekerjaan.</div>`;
+      ? `<div class="milestone-empty">Tidak ada PO dengan invoice yang cocok filter ini.</div>`
+      : `<div class="milestone-empty">Belum ada data PO Master. Tambahkan tab <strong>"PO Master"</strong> di sheet dengan kolom: No PO, Nilai PO, Nama Pekerjaan, Link PDF PO.</div>`;
     return;
   }
 
@@ -1538,13 +1747,13 @@ function renderMilestonePO(data) {
   }).sort((a, b) => b.nilai - a.nilai);
 
   document.getElementById('milestoneList').innerHTML = rows.map(r => `
-    <div class="milestone-item" data-po="${r.po}" title="Klik untuk lihat detail">
+    <div class="milestone-item" data-po="${r.po}" title="Klik untuk lihat detail & dokumen PO">
       <div class="milestone-item-top">
         <span class="milestone-po">${r.po} <span class="milestone-job">— ${r.nama}</span></span>
         <span class="milestone-pct">${r.pct.toFixed(0)}%</span>
       </div>
       <div class="milestone-bar-wrap"><div class="milestone-bar" style="width:${Math.min(r.pct,100)}%"></div></div>
-      <div class="milestone-sub">Rp ${Number(r.inv).toLocaleString('id-ID')} / Rp ${Number(r.nilai).toLocaleString('id-ID')}</div>
+      <div class="milestone-sub">${formatRp(r.inv)} / ${formatRp(r.nilai)}</div>
     </div>
   `).join('');
 }
@@ -1566,18 +1775,42 @@ function openPOMilestoneDetail(po) {
   document.getElementById('poDetailInfoGrid').innerHTML = `
     <div class="detail-info-item"><div class="di-label">No PO</div><div class="di-val">${po}</div></div>
     <div class="detail-info-item"><div class="di-label">Nama Pekerjaan</div><div class="di-val">${master['Nama Pekerjaan']||'–'}</div></div>
-    <div class="detail-info-item"><div class="di-label">Nilai PO</div><div class="di-val">Rp ${Number(nilai).toLocaleString('id-ID')}</div></div>
-    <div class="detail-info-item"><div class="di-label">Sudah Terinvoice</div><div class="di-val" style="color:var(--orange)">Rp ${Number(invoiced).toLocaleString('id-ID')} (${pct.toFixed(1)}%)</div></div>
-    <div class="detail-info-item"><div class="di-label">Belum Terinvoice</div><div class="di-val">Rp ${Number(belum).toLocaleString('id-ID')}</div></div>
+    <div class="detail-info-item"><div class="di-label">Nilai PO</div><div class="di-val">${formatRp(nilai)}</div></div>
+    <div class="detail-info-item"><div class="di-label">Sudah Terinvoice</div><div class="di-val" style="color:var(--orange)">${formatRp(invoiced)} (${pct.toFixed(1)}%)</div></div>
+    <div class="detail-info-item"><div class="di-label">Belum Terinvoice</div><div class="di-val">${formatRp(belum)}</div></div>
     <div class="detail-info-item"><div class="di-label">Jumlah Invoice</div><div class="di-val">${invoices.length}</div></div>
   `;
   document.getElementById('poDetailBar').style.width = `${Math.min(pct,100)}%`;
 
+  // PDF PO document button
+  const pdfPO = String(master['Link PDF PO'] || '').trim();
+  const pwdSet = !!getPdfPassword();
+  let pdfHtml = '';
+  if (pdfPO) {
+    pdfHtml = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-pdf" onclick="requestPdfAccess('${pdfPO}','Dokumen PO ${po}','view')">
+          📄 Lihat Dokumen PO${pwdSet?' 🔐':''}
+        </button>
+        <button class="btn-pdf" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border)"
+          onclick="requestPdfAccess('${pdfPO}','Dokumen PO ${po}','download')">
+          ⬇ Download PDF${pwdSet?' 🔐':''}
+        </button>
+      </div>
+      ${pwdSet ? `<p style="font-size:10px;color:var(--muted);margin-top:6px">🔐 Dokumen ini dilindungi password. Kamu akan diminta memasukkan password sebelum mengakses.</p>` : ''}
+    `;
+  } else {
+    pdfHtml = `<span class="btn-pdf disabled">📄 Dokumen PO belum tersedia</span>
+      <span style="font-size:10px;color:var(--muted);margin-left:8px">Tambahkan kolom <code style="color:var(--orange)">Link PDF PO</code> di tab PO Master</span>`;
+  }
+  document.getElementById('poPdfBtnArea').innerHTML = pdfHtml;
+
+  // Invoice list
   const body = document.getElementById('poDetailItemsBody');
   const foot = document.getElementById('poDetailItemsFoot');
   const statusBadge = s => {
     const norm = String(s||'').trim().toLowerCase();
-    if (norm === 'paid') return `<span class="badge badge-green">Paid</span>`;
+    if (norm === 'paid')   return `<span class="badge badge-green">Paid</span>`;
     if (norm === 'unpaid') return `<span class="badge badge-gray">Unpaid</span>`;
     return `<span class="badge badge-gray">–</span>`;
   };
@@ -1592,14 +1825,15 @@ function openPOMilestoneDetail(po) {
         <td>${inv['ACT ID']||'–'}</td>
         <td style="font-size:10px;color:var(--muted)">${inv['No BAST']||'–'}</td>
         <td>${inv['Periode']||'–'} ${inv['Tahun']||''}</td>
-        <td style="color:var(--orange);font-weight:600">${Number(inv['Value Invoice']||0).toLocaleString('id-ID')}</td>
+        <td style="color:var(--orange);font-weight:600">${formatRp(+inv['Value Invoice']||0)}</td>
         <td>${statusBadge(inv['Paid'])}</td>
       </tr>
     `).join('');
+    const totalInv2 = invoices.reduce((s,r)=>s+(+r['Value Invoice']||0),0);
     foot.innerHTML = `
       <tr>
         <td colspan="4">TOTAL</td>
-        <td>${invoices.reduce((s,r)=>s+(+r['Value Invoice']||0),0).toLocaleString('id-ID')}</td>
+        <td>${formatRp(totalInv2)}</td>
         <td>–</td>
       </tr>
     `;
@@ -1623,7 +1857,7 @@ function renderTable(data) {
   };
   const statusBadge = s => {
     const norm = String(s||'').trim().toLowerCase();
-    if (norm === 'paid') return `<span class="badge badge-green">Paid</span>`;
+    if (norm === 'paid')   return `<span class="badge badge-green">Paid</span>`;
     if (norm === 'unpaid') return `<span class="badge badge-gray">Unpaid</span>`;
     return `<span class="badge badge-gray">–</span>`;
   };
@@ -1633,7 +1867,7 @@ function renderTable(data) {
       <td>${r['ACT ID']||'–'}</td>
       <td>${r['No PO']||'–'}</td>
       <td style="font-size:10px;color:var(--muted)">${r['No BAST']||'–'}</td>
-      <td style="color:var(--orange);font-weight:600">${Number(r['Value Invoice']||0).toLocaleString('id-ID')}</td>
+      <td style="color:var(--orange);font-weight:600">${formatRp(+r['Value Invoice']||0)}</td>
       <td>${r['Periode']||'–'}</td>
       <td>${r['Tahun']||'–'}</td>
       <td>${r['Bulan Tanggal']||'–'}</td>
@@ -1645,12 +1879,7 @@ function renderTable(data) {
 }
 function toggleShowAll() { showAll = !showAll; renderTable(filteredData); }
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function formatM(v) {
-  const m = v / 1e9;
-  return Math.abs(m) >= 1 ? `Rp ${m.toFixed(2)} M` : `Rp ${(v/1e6).toFixed(2)} Jt`;
-}
-function formatJuta(v) { return `Rp ${(v/1e6).toFixed(2)} Juta`; }
+// ─── LOADING ──────────────────────────────────────────────────────────────────
 function showLoading(msg) {
   document.getElementById('loadingText').textContent = msg || 'Memuat…';
   document.getElementById('loadingOverlay').style.display = 'flex';
