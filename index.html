@@ -401,9 +401,7 @@
       <!-- Password config -->
       <div class="pwd-config-block">
         <div class="pcb-label">🔐 Password Dokumen PO</div>
-        <label class="modal-label" style="margin-bottom:6px">Password untuk lihat & download PDF PO</label>
-        <input type="password" id="defaultPwdInput" placeholder="Kosongkan = tanpa password" style="margin-bottom:4px">
-        <div class="pcb-hint">Password ini digunakan untuk semua dokumen PO. Jika dikosongkan, PDF langsung terbuka tanpa proteksi.</div>
+        <div class="pcb-hint">PIN diatur lewat tab <strong>"Password"</strong> di Google Sheets (kolom pertama, baris pertama = nilai PIN), bukan dari sini. Kalau tab kosong/tidak ada, PDF langsung terbuka tanpa proteksi.</div>
       </div>
 
       <div class="error-msg" id="defaultError"></div>
@@ -431,9 +429,7 @@
 
       <div class="pwd-config-block">
         <div class="pcb-label">🔐 Password Dokumen PO</div>
-        <label class="modal-label" style="margin-bottom:6px">Password untuk lihat & download PDF PO</label>
-        <input type="password" id="customPwdInput" placeholder="Kosongkan = tanpa password" style="margin-bottom:4px">
-        <div class="pcb-hint">Password ini digunakan untuk semua dokumen PO. Jika dikosongkan, PDF langsung terbuka tanpa proteksi.</div>
+        <div class="pcb-hint">PIN diatur lewat tab <strong>"Password"</strong> di Google Sheets (kolom pertama, baris pertama = nilai PIN), bukan dari sini. Kalau tab kosong/tidak ada, PDF langsung terbuka tanpa proteksi.</div>
       </div>
 
       <div class="error-msg" id="configError"></div>
@@ -770,6 +766,7 @@ const DEFAULT_SHEET_ID   = '1a8MB2MZlViXyoCA45QuOw2ahiipGBmUH0CbzF5CgY0Q';
 const DEFAULT_SHEET_NAME = 'Sheet1';
 const DEFAULT_DETAIL_SHEET_NAME = 'Detail';
 const DEFAULT_PO_MASTER_SHEET_NAME = 'PO Master';
+const DEFAULT_PWD_SHEET_NAME = 'Password';
 
 const PERIODE_ORDER = [
   'Januari','Februari','Maret','April','Mei','Juni',
@@ -793,6 +790,7 @@ let rawData      = [];
 let filteredData = [];
 let detailData   = [];
 let poMasterData = [];
+let sheetPdfPin  = ''; // PIN/password diambil dari tab "Password" di Google Sheets (bukan localStorage)
 let currentTableRows = [];
 let showAll      = false;
 let charts       = {};
@@ -859,7 +857,7 @@ function scrollToTable() {
 
 // ─── PDF PASSWORD SYSTEM ──────────────────────────────────────────────────────
 function getPdfPassword() {
-  return localStorage.getItem('inv_pdf_pwd') || '';
+  return sheetPdfPin || '';
 }
 
 function togglePwdVisibility() {
@@ -1071,13 +1069,10 @@ function openConfig() {
   switchTab(src === 'custom' ? 'custom' : src === 'demo' ? 'demo' : 'default');
   const savedDetailName   = localStorage.getItem('inv_detail_sheet_name') || DEFAULT_DETAIL_SHEET_NAME;
   const savedPOMasterName = localStorage.getItem('inv_po_master_sheet_name') || DEFAULT_PO_MASTER_SHEET_NAME;
-  const savedPwd          = localStorage.getItem('inv_pdf_pwd') || '';
   document.getElementById('defaultDetailSheetName').value   = savedDetailName;
   document.getElementById('detailSheetNameInput').value     = savedDetailName;
   document.getElementById('defaultPOMasterSheetName').value = savedPOMasterName;
   document.getElementById('poMasterSheetNameInput').value   = savedPOMasterName;
-  document.getElementById('defaultPwdInput').value = savedPwd;
-  document.getElementById('customPwdInput').value  = savedPwd;
   if (src === 'custom') {
     document.getElementById('sheetIdInput').value   = localStorage.getItem('inv_sheet_id') || '';
     document.getElementById('sheetNameInput').value = localStorage.getItem('inv_sheet_name') || DEFAULT_SHEET_NAME;
@@ -1092,13 +1087,10 @@ function connectDefault() {
   const name         = document.getElementById('defaultSheetName').value.trim() || DEFAULT_SHEET_NAME;
   const detailName   = document.getElementById('defaultDetailSheetName').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   const poMasterName = document.getElementById('defaultPOMasterSheetName').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
-  const pwd          = document.getElementById('defaultPwdInput').value;
   localStorage.setItem('inv_source',     'default');
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
   localStorage.setItem('inv_po_master_sheet_name', poMasterName);
-  if (pwd) localStorage.setItem('inv_pdf_pwd', pwd);
-  else localStorage.removeItem('inv_pdf_pwd');
   localStorage.removeItem('inv_sheet_id');
   hideConfig();
   setSourceIndicator('Sheet Default');
@@ -1111,15 +1103,12 @@ function connectCustom() {
   const name         = document.getElementById('sheetNameInput').value.trim() || DEFAULT_SHEET_NAME;
   const detailName   = document.getElementById('detailSheetNameInput').value.trim() || DEFAULT_DETAIL_SHEET_NAME;
   const poMasterName = document.getElementById('poMasterSheetNameInput').value.trim() || DEFAULT_PO_MASTER_SHEET_NAME;
-  const pwd          = document.getElementById('customPwdInput').value;
   if (!id) { showErr('configError', 'Sheet ID tidak boleh kosong.'); return; }
   localStorage.setItem('inv_source',     'custom');
   localStorage.setItem('inv_sheet_id',   id);
   localStorage.setItem('inv_sheet_name', name);
   localStorage.setItem('inv_detail_sheet_name', detailName);
   localStorage.setItem('inv_po_master_sheet_name', poMasterName);
-  if (pwd) localStorage.setItem('inv_pdf_pwd', pwd);
-  else localStorage.removeItem('inv_pdf_pwd');
   hideConfig();
   setSourceIndicator('Custom Sheet');
   showLoading('Mengambil data dari Google Sheets…');
@@ -1139,6 +1128,7 @@ function loadDemo() {
     rawData      = generateDummyData();
     detailData   = generateDummyDetailData(rawData);
     poMasterData = generateDummyPOMasterData();
+    sheetPdfPin  = '1234'; // contoh PIN untuk mode demo
     onDataReady();
   }, 600);
 }
@@ -1168,6 +1158,7 @@ function fetchSheetData(sheetId, sheetName, detailSheetName, poMasterSheetName) 
       }
       fetchDetailSheetData(sheetId, detailSheetName || DEFAULT_DETAIL_SHEET_NAME);
       fetchPOMasterData(sheetId, poMasterSheetName || DEFAULT_PO_MASTER_SHEET_NAME);
+      fetchPwdSheetData(sheetId);
     })
     .catch(() => {
       hideLoading();
@@ -1201,6 +1192,31 @@ function fetchPOMasterData(sheetId, poMasterSheetName) {
       renderKpiNilaiPO(filteredData);
     })
     .catch(() => { poMasterData = []; renderMilestonePO(filteredData); renderKpiNilaiPO(filteredData); });
+}
+
+// Tab "Password" berisi PIN untuk buka/download PDF PO & Invoice.
+// Cukup 1 kolom (header bebas, misal "PIN" atau "Password") + 1 baris data berisi PIN-nya.
+// Kalau tab-nya tidak ada / kosong, PDF dianggap tanpa proteksi (langsung terbuka).
+function fetchPwdSheetData(sheetId) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DEFAULT_PWD_SHEET_NAME)}`;
+  fetch(url)
+    .then(r => r.text())
+    .then(text => {
+      try {
+        const json = JSON.parse(text.substring(47, text.length - 2));
+        sheetPdfPin = parseGvizPwdData(json);
+      } catch(e) { sheetPdfPin = ''; }
+    })
+    .catch(() => { sheetPdfPin = ''; });
+}
+
+function parseGvizPwdData(json) {
+  const rows = json.table.rows;
+  if (!rows || !rows.length) return '';
+  const firstRow = rows[0];
+  if (!firstRow || !firstRow.c || !firstRow.c.length) return '';
+  const cell = firstRow.c.find(c => c && c.v !== null && c.v !== undefined && String(c.v).trim() !== '');
+  return cell ? String(cell.v).trim() : '';
 }
 
 function showConfig_withError(msg) {
